@@ -320,16 +320,8 @@ class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
         # the Gtk signal handlers use the input check variables.
 
         if self._password_kickstarted:
-            self.usepassword.set_active(True)
             self.pw.set_placeholder_text(_("The password was set by kickstart."))
             self.confirm.set_placeholder_text(_("The password was set by kickstart."))
-        elif not self.policy.emptyok:
-            # Policy is that a non-empty password is required
-            self.usepassword.set_active(True)
-
-        if not self.policy.emptyok:
-            # User isn't allowed to change whether password is required or not
-            self.usepassword.set_sensitive(False)
 
         # set the visibility of the password entries
         set_password_visibility(self.pw, False)
@@ -364,21 +356,12 @@ class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
     def apply(self):
         # set the password only if the user enters anything to the text entry
         # this should preserve the kickstart based password
-        if self.input_enabled:
-            if self.pw.get_text():
-                self._password_kickstarted = False
-                self._user.password = cryptPassword(self.pw.get_text())
-                self._user.isCrypted = True
-                self.pw.set_placeholder_text("")
-                self.confirm.set_placeholder_text("")
-
-        # reset the password when the user unselects it
-        else:
+        if self.pw.get_text():
+            self._password_kickstarted = False
+            self._user.password = cryptPassword(self.pw.get_text())
+            self._user.isCrypted = True
             self.pw.set_placeholder_text("")
             self.confirm.set_placeholder_text("")
-            self._user.password = ""
-            self._user.isCrypted = False
-            self._password_kickstarted = False
 
         self._user.name = self.username.get_text()
 
@@ -404,19 +387,6 @@ class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
     @property
     def completed(self):
         return len(self.data.user.userList) > 0
-
-    def usepassword_toggled(self, togglebutton=None, data=None):
-        """Called by Gtk callback when the "Use password" check
-        button is toggled. It will make password entries in/sensitive."""
-
-        self.input_enabled = togglebutton.get_active()
-
-        self.pw.set_sensitive(togglebutton.get_active())
-        self.confirm.set_sensitive(togglebutton.get_active())
-
-        # Re-check the password
-        self.pw.emit("changed")
-        self.confirm.emit("changed")
 
     def password_changed(self, editable=None, data=None):
         """Update the password strength level bar"""

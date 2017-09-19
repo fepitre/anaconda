@@ -358,7 +358,7 @@ class GUISpokeInputCheckHandler(GUIInputCheckHandler, metaclass=ABCMeta):
             self._error = False
             result = InputCheck.CHECK_OK
         # Skip the check if no password is required
-        elif (not self.input_enabled) or self.input_kickstarted:
+        elif self.input_kickstarted:
             result = InputCheck.CHECK_OK
         elif self.input_confirmation and (self.input != self.input_confirmation):
             result = _(constants.PASSWORD_CONFIRM_ERROR_GUI)
@@ -380,7 +380,7 @@ class GUISpokeInputCheckHandler(GUIInputCheckHandler, metaclass=ABCMeta):
             return InputCheck.CHECK_OK
 
         # Skip the check if no password is required
-        if (not self.input_enabled) or self.input_kickstarted:
+        if self.input_kickstarted:
             return InputCheck.CHECK_OK
         # Also skip the check if the policy says that an empty password is fine
         # pylint: disable=no-member
@@ -422,7 +422,7 @@ class GUISpokeInputCheckHandler(GUIInputCheckHandler, metaclass=ABCMeta):
         self.set_input_status(status_text)
 
         # Skip the check if no password is required
-        if not self.input_enabled or self.input_kickstarted:
+        if self.input_kickstarted:
             return InputCheck.CHECK_OK
 
         # pylint: disable=no-member
