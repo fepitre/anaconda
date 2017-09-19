@@ -63,6 +63,8 @@ if [ -e /tmp/dd_interactive -a ! -e /tmp/dd.done ]; then
     fi
 fi
 
+modprobe -q loop
+
 info "anaconda using disk root at $dev"
 mount $dev $repodir || warn "Couldn't mount $dev"
 anaconda_live_root_dir $repodir $path
