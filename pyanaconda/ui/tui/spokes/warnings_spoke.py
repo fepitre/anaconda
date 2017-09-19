@@ -44,15 +44,15 @@ class WarningsSpoke(StandaloneTUISpoke):
         StandaloneTUISpoke.__init__(self, *args, **kwargs)
         self.initialize_start()
 
-        self._message = _("This hardware (or a combination thereof) is not "
-                          "supported by Red Hat.  For more information on "
-                          "supported hardware, please refer to "
-                          "http://www.redhat.com/hardware.")
+        self._message = _("This hardware lack features required by Qubes OS. "
+                          "Missing features: %(features)s. "
+                          "For more information on supported hardware, "
+                          "please refer to https://www.qubes-os.org/system-requirements/")
         # Does anything need to be displayed?
         # pylint: disable=no-member
-        self._unsupported = productName.startswith("Red Hat ") and \
-                            is_unsupported_hw() and \
-                            not self.data.unsupportedhardware.unsupported_hardware
+        #   self._unsupported = not self.data.unsupportedhardware.unsupported_hardware \
+        #                       and is_unsupported_hw()
+        self._unsupported = is_unsupported_hw()
 
         self.initialize_done()
 
@@ -63,7 +63,7 @@ class WarningsSpoke(StandaloneTUISpoke):
     def refresh(self, args=None):
         StandaloneTUISpoke.refresh(self, args)
 
-        self._window += [TextWidget(self._message), ""]
+        self._window += [TextWidget(self._message % {'features': self._unsupported}), ""]
 
         return True
 
