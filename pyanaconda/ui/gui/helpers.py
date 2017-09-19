@@ -350,8 +350,15 @@ class GUISpokeInputCheckHandler(GUIInputCheckHandler, metaclass=ABCMeta):
 
     def check_password_confirm(self, inputcheck):
         """If the user has entered confirmation data, check whether it matches the password."""
+
+        if self.lock.get_active():
+            self._lock = True
+            self._password = None
+            self.clear_info()
+            self._error = False
+            result = InputCheck.CHECK_OK
         # Skip the check if no password is required
-        if (not self.input_enabled) or self.input_kickstarted:
+        elif (not self.input_enabled) or self.input_kickstarted:
             result = InputCheck.CHECK_OK
         elif self.input_confirmation and (self.input != self.input_confirmation):
             result = _(constants.PASSWORD_CONFIRM_ERROR_GUI)
@@ -368,6 +375,8 @@ class GUISpokeInputCheckHandler(GUIInputCheckHandler, metaclass=ABCMeta):
         # If the password was set by kickstart, skip the strength check
         # pylint: disable=no-member
         if self.input_kickstarted and not self.policy.changesok:
+            return InputCheck.CHECK_OK
+        if self.lock.get_active():
             return InputCheck.CHECK_OK
 
         # Skip the check if no password is required
