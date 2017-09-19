@@ -77,7 +77,7 @@ from pyanaconda.bootloader import BootLoaderError
 from pyanaconda.storage_utils import on_disk_storage
 from pyanaconda.screen_access import sam
 
-from pykickstart.constants import CLEARPART_TYPE_NONE, AUTOPART_TYPE_LVM
+from pykickstart.constants import CLEARPART_TYPE_NONE, AUTOPART_TYPE_LVM, AUTOPART_TYPE_LVM_THINP
 from pykickstart.errors import KickstartParseError
 
 import sys
@@ -629,7 +629,7 @@ class StorageSpoke(NormalSpoke, StorageCheckHandler):
         self.autopart = self.data.autopart.autopart
         self.autoPartType = self.data.autopart.type
         if self.autoPartType is None:
-            self.autoPartType = AUTOPART_TYPE_LVM
+            self.autoPartType = AUTOPART_TYPE_LVM_THINP
         self.encrypted = self.data.autopart.encrypted
         self.passphrase = self.data.autopart.passphrase
 
