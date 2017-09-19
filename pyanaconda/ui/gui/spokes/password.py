@@ -51,6 +51,7 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
     def __init__(self, *args):
         NormalSpoke.__init__(self, *args)
         GUISpokeInputCheckHandler.__init__(self)
+        self._lock = self.data.rootpw.lock
         self._kickstarted = False
 
     def initialize(self):
@@ -59,6 +60,7 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
         # place holders for the text boxes
         self.pw = self.builder.get_object("pw")
         self.confirm = self.builder.get_object("confirmPW")
+        self.lock = self.builder.get_object("lock")
 
         # Install the password checks:
         # - Has a password been specified?
@@ -107,17 +109,31 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
         # Enable the input checks in case they were disabled on the last exit
         for check in self.checks:
             check.enabled = True
-
-        self.pw.grab_focus()
+        self.lock.set_active(self._lock)
+        self.on_lock_clicked(self.lock)
         self.pw.emit("changed")
         self.confirm.emit("changed")
 
+    def on_lock_clicked(self, lock):
+        self.pw.set_sensitive(not lock.get_active())
+        self.confirm.set_sensitive(not lock.get_active())
+        if not lock.get_active():
+            self.pw.grab_focus()
+
+# Caps lock detection isn't hooked up right now
+#    def setCapsLockLabel(self):
+#        if isCapsLockEnabled():
+#            self.capslock.set_text("<b>" + _("Caps Lock is on.") + "</b>")
+#            self.capslock.set_use_markup(True)
+#        else:
+#            self.capslock..set_text("")
+
     @property
     def status(self):
-        if self.data.rootpw.password:
-            return _("Root password is set")
-        elif self.data.rootpw.lock:
+        if self.data.rootpw.lock:
             return _("Root account is disabled")
+        elif self.data.rootpw.password:
+            return _("Root password is set")
         else:
             return _("Root password is not set")
 
@@ -132,15 +148,10 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
         self.data.rootpw.seen = False
         self._kickstarted = False
 
-        self.data.rootpw.lock = False
-
-        if not pw:
-            self.data.rootpw.password = ''
-            self.data.rootpw.isCrypted = False
-            return
-
-        self.data.rootpw.password = cryptPassword(pw)
-        self.data.rootpw.isCrypted = True
+        if pw:
+            self.data.rootpw.password = cryptPassword(pw)
+            self.data.rootpw.isCrypted = True
+        self.data.rootpw.lock = self._lock
 
         self.pw.set_placeholder_text("")
         self.confirm.set_placeholder_text("")
