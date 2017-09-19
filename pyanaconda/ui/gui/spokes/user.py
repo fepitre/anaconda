@@ -26,7 +26,6 @@ from pyanaconda.users import cryptPassword, guess_username, check_username
 from pyanaconda.ui.gui.spokes import NormalSpoke
 from pyanaconda.ui.gui import GUIObject
 from pyanaconda.ui.categories.user_settings import UserSettingsCategory
-from pyanaconda.ui.common import FirstbootSpokeMixIn
 from pyanaconda.ui.helpers import InputCheck
 from pyanaconda.ui.gui.helpers import GUISpokeInputCheckHandler, GUIDialogInputCheckHandler
 from pyanaconda.ui.gui.utils import blockedHandler, set_password_visibility
@@ -208,7 +207,7 @@ class AdvancedUserDialog(GUIObject, GUIDialogInputCheckHandler):
 
         return False
 
-class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
+class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
     """
        .. inheritance-diagram:: UserSpoke
           :parts: 3
@@ -357,10 +356,7 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
 
     @property
     def mandatory(self):
-        """ Only mandatory if the root pw hasn't been set in the UI
-            eg. not mandatory if the root account was locked in a kickstart
-        """
-        return not self.data.rootpw.password and not self.data.rootpw.lock
+        return True
 
     def apply(self):
         # set the password only if the user enters anything to the text entry
