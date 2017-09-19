@@ -21,6 +21,7 @@
 import collections
 import os
 import re
+import shutil
 import blivet
 from parted import PARTITION_BIOS_GRUB
 from glob import glob
@@ -1840,6 +1841,82 @@ class EFIGRUB(EFIBase, GRUB2):
 class Aarch64EFIGRUB(EFIGRUB):
     _serial_consoles = ["ttyAMA", "ttyS"]
 
+class XenEFI(EFIGRUB):
+    packages = ["efibootmgr"]
+    _config_file = 'xen.cfg'
+
+    # stage2 not used at all, so allow any type
+    stage2_device_types = ["partition", "mdarray", "lvmlv"]
+
+    def __init__(self):
+        super(XenEFI, self).__init__()
+        self.efi_dir = 'qubes'
+
+    def add_efi_boot_target(self):
+        if self.stage1_device.type == "partition":
+            boot_disk = self.stage1_device.disk
+            boot_part_num = self.stage1_device.parted_partition.number
+        elif self.stage1_device.type == "mdarray":
+            # FIXME: I'm just guessing here. This probably needs the full
+            #        treatment, ie: multiple targets for each member.
+            boot_disk = self.stage1_device.parents[0].disk
+            boot_part_num = self.stage1_device.parents[0].parted_partition.number
+        boot_part_num = str(boot_part_num)
+
+        if not os.path.exists(
+                "{}/{}".format(iutil.getSysroot() + self.config_dir, "xen.efi")):
+            xen_efi = [x for x in os.listdir(iutil.getSysroot() + self.config_dir) if
+                       x.startswith('xen-') and x.endswith('.efi')][0]
+            shutil.copy("{}/{}".format(iutil.getSysroot() + self.config_dir, xen_efi),
+                        "{}/{}".format(iutil.getSysroot() + self.config_dir, "xen.efi"))
+        rc = self.efibootmgr("-c", "-w", "-L", productName,
+                             "-d", boot_disk.path, "-p", boot_part_num,
+                             "-l",
+                             self.efi_dir_as_efifs_dir + "\\xen.efi",
+                             root=iutil.getSysroot())
+        if rc:
+            raise BootLoaderError("failed to set new efi boot target")
+
+    def add_image(self, image):
+        super(XenEFI, self).add_image(image)
+        shutil.copy("{}/boot/{}".format(iutil.getSysroot(), image.kernel),
+                    os.path.normpath(
+                        "{}/{}".format(iutil.getSysroot() + self.config_dir,
+                                       image.kernel)))
+        if image.initrd is not None:
+            shutil.copy("{}/boot/{}".format(iutil.getSysroot(), image.initrd),
+                        os.path.normpath(
+                            "{}/{}".format(iutil.getSysroot() + self.config_dir,
+                                           image.initrd)))
+
+    def write_config_header(self, config):
+        config.write("[global]\n")
+        config.write("default={}\n".format(self.default.version))
+
+    def write_config_images(self, config):
+        for image in self.images:
+            config.write("\n")
+            config.write("[{}]\n".format(image.version))
+            config.write("options=loglvl=all dom0_mem=min:1024M dom0_mem=max:4096M iommu=no-igfx\n")
+            config.write("kernel={} root={} {}\n".format(
+                image.kernel,
+                image.device.fstab_spec,
+                self.boot_args))
+            config.write("ramdisk={}\n".format(image.initrd))
+
+    def write_config_console(self, config):
+        pass
+
+    def write_config_post(self):
+        pass
+
+    def is_valid_stage2_device(self, device, linux=True, non_linux=False):
+        """ XenEFI doesn't use stage2 at all, so allow anything here """
+        return True
+
+    write_config = BootLoader.write_config
+
+
 class MacEFIGRUB(EFIGRUB):
     def mactel_config(self):
         if os.path.exists(iutil.getSysroot() + "/usr/libexec/mactel-boot-setup"):
@@ -2351,7 +2428,7 @@ class EXTLINUX(BootLoader):
 # every platform that wants a bootloader needs to be in this dict
 bootloader_by_platform = {
     platform.X86: GRUB2,
-    platform.EFI: EFIGRUB,
+    platform.EFI: XenEFI,
     platform.MacEFI: MacEFIGRUB,
     platform.PPC: GRUB2,
     platform.IPSeriesPPC: IPSeriesGRUB2,
