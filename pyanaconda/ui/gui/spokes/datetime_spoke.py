@@ -45,7 +45,6 @@ from pyanaconda import iutil
 from pyanaconda import isys
 from pyanaconda import network
 from pyanaconda import nm
-from pyanaconda import ntp
 from pyanaconda import flags
 from pyanaconda import constants
 from pyanaconda.threads import threadMgr, AnacondaThread
@@ -491,8 +490,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
         self._year_format, suffix = formats[widgets.index(year_box)]
         year_label.set_text(suffix)
 
-        self._ntpSwitch = self.builder.get_object("networkTimeSwitch")
-
         self._regions_zones = get_all_regions_and_timezones()
 
         # Set the initial sensitivity of the AM/PM toggle based on the time-type selected
@@ -500,9 +497,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
 
         if not flags.can_touch_runtime_system("modify system time and date"):
             self._set_date_time_setting_sensitive(False)
-
-        self._config_dialog = NTPconfigDialog(self.data)
-        self._config_dialog.initialize()
 
         threadMgr.add(AnacondaThread(name=constants.THREAD_DATE_TIME,
                                      target=self._initialize))
@@ -588,8 +582,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
             self.data.timezone.seen = False
             self._kickstarted = False
 
-        self.data.timezone.nontp = not self._ntpSwitch.get_active()
-
     def execute(self):
         if self._update_datetime_timer_id is not None:
             GLib.source_remove(self._update_datetime_timer_id)
@@ -624,20 +616,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
             time.tzset()
 
         self._update_datetime()
-
-        has_active_network = nm.nm_is_connected()
-        if not has_active_network:
-            self._show_no_network_warning()
-        else:
-            self.clear_info()
-            gtk_call_once(self._config_dialog.refresh_servers_state)
-
-        if flags.can_touch_runtime_system("get NTP service state"):
-            ntp_working = has_active_network and iutil.service_running(NTP_SERVICE)
-        else:
-            ntp_working = not self.data.timezone.nontp
-
-        self._ntpSwitch.set_active(ntp_working)
 
     @gtk_action_wait
     def _set_timezone(self, timezone):
@@ -1095,72 +1073,3 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
         #contains all date/time setting widgets
         footer_alignment = self.builder.get_object("footerAlignment")
         footer_alignment.set_sensitive(sensitive)
-
-    def _show_no_network_warning(self):
-        self.set_warning(_("You need to set up networking first if you "\
-                           "want to use NTP"))
-
-    def _show_no_ntp_server_warning(self):
-        self.set_warning(_("You have no working NTP server configured"))
-
-    def on_ntp_switched(self, switch, *args):
-        if switch.get_active():
-            #turned ON
-            if not flags.can_touch_runtime_system("start NTP service"):
-                #cannot touch runtime system, not much to do here
-                return
-
-            if not nm.nm_is_connected():
-                self._show_no_network_warning()
-                switch.set_active(False)
-                return
-            else:
-                self.clear_info()
-
-                working_server = self._config_dialog.working_server
-                if working_server is None:
-                    self._show_no_ntp_server_warning()
-                else:
-                    #we need a one-time sync here, because chronyd would not change
-                    #the time as drastically as we need
-                    ntp.one_time_sync_async(working_server)
-
-            ret = iutil.start_service(NTP_SERVICE)
-            self._set_date_time_setting_sensitive(False)
-
-            #if starting chronyd failed and chronyd is not running,
-            #set switch back to OFF
-            if (ret != 0) and not iutil.service_running(NTP_SERVICE):
-                switch.set_active(False)
-
-        else:
-            #turned OFF
-            if not flags.can_touch_runtime_system("stop NTP service"):
-                #cannot touch runtime system, nothing to do here
-                return
-
-            self._set_date_time_setting_sensitive(True)
-            ret = iutil.stop_service(NTP_SERVICE)
-
-            #if stopping chronyd failed and chronyd is running,
-            #set switch back to ON
-            if (ret != 0) and iutil.service_running(NTP_SERVICE):
-                switch.set_active(True)
-
-            self.clear_info()
-
-    def on_ntp_config_clicked(self, *args):
-        self._config_dialog.refresh()
-
-        with self.main_window.enlightbox(self._config_dialog.window):
-            response = self._config_dialog.run()
-
-        if response == 1:
-            pools, servers = self._config_dialog.pools_servers
-            self.data.timezone.ntpservers = ntp.pools_servers_to_internal(pools, servers)
-
-            if self._config_dialog.working_server is None:
-                self._show_no_ntp_server_warning()
-            else:
-                self.clear_info()
-
