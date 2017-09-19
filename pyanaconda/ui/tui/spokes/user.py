@@ -20,7 +20,6 @@
 from pyanaconda.ui.categories.user_settings import UserSettingsCategory
 from pyanaconda.ui.tui.spokes import EditTUISpoke
 from pyanaconda.ui.tui.spokes import EditTUISpokeEntry as Entry
-from pyanaconda.ui.common import FirstbootSpokeMixIn
 from pyanaconda.users import guess_username, check_username
 from pyanaconda.flags import flags
 from pyanaconda.i18n import N_, _
@@ -31,7 +30,7 @@ from pyanaconda.regexes import GECOS_VALID, GROUPLIST_SIMPLE_VALID
 __all__ = ["UserSpoke"]
 
 
-class UserSpoke(FirstbootSpokeMixIn, EditTUISpoke):
+class UserSpoke(EditTUISpoke):
     """
        .. inheritance-diagram:: UserSpoke
           :parts: 3
@@ -65,7 +64,6 @@ class UserSpoke(FirstbootSpokeMixIn, EditTUISpoke):
             return False
 
     def __init__(self, data, storage, payload, instclass):
-        FirstbootSpokeMixIn.__init__(self)
         EditTUISpoke.__init__(self, data, storage, payload, instclass, "user")
         self.title = N_("User creation")
         self.initialize_start()
@@ -113,10 +111,7 @@ class UserSpoke(FirstbootSpokeMixIn, EditTUISpoke):
 
     @property
     def mandatory(self):
-        """ Only mandatory if the root pw hasn't been set in the UI
-            eg. not mandatory if the root account was locked in a kickstart
-        """
-        return not self.data.rootpw.password and not self.data.rootpw.lock
+        return True
 
     @property
     def status(self):
