@@ -23,7 +23,6 @@ from pyanaconda.core.regexes import GECOS_VALID
 from pyanaconda.modules.common.constants.services import USERS
 
 from pyanaconda.ui.categories.user_settings import UserSettingsCategory
-from pyanaconda.ui.common import FirstbootSpokeMixIn
 from pyanaconda.ui.tui.spokes import NormalTUISpoke
 from pyanaconda.ui.tui.tuiobject import Dialog, PasswordDialog, report_if_failed, report_check_func
 from pyanaconda.users import guess_username, check_username, check_grouplist
@@ -38,7 +37,7 @@ __all__ = ["UserSpoke"]
 FULLNAME_ERROR_MSG = N_("Full name can't contain the ':' character")
 
 
-class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
+class UserSpoke(NormalTUISpoke):
     """
        .. inheritance-diagram:: UserSpoke
           :parts: 3
@@ -48,9 +47,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
 
     @classmethod
     def should_run(cls, environment, data):
-        if FirstbootSpokeMixIn.should_run(environment, data):
-            return True
-
         # the user spoke should run always in the anaconda and in firstboot only
         # when doing reconfig or if no user has been created in the installation
         if environment == FIRSTBOOT_ENVIRON and data and not data.user.userList:
@@ -59,7 +55,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
         return False
 
     def __init__(self, data, storage, payload, instclass):
-        FirstbootSpokeMixIn.__init__(self)
         NormalTUISpoke.__init__(self, data, storage, payload, instclass)
 
         self.initialize_start()
@@ -186,10 +181,7 @@ class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
 
     @property
     def mandatory(self):
-        """ Only mandatory if the root pw hasn't been set in the UI
-            eg. not mandatory if the root account was locked in a kickstart
-        """
-        return not self._users_module.proxy.IsRootPasswordSet and not self._users_module.proxy.IsRootAccountLocked
+        return True
 
     @property
     def status(self):
