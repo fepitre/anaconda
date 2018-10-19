@@ -52,7 +52,7 @@ def cryptPassword(password, algo=None):
 
 def check_username(name):
     # Check reserved names.
-    if name in os.listdir("/") + ["root", "home", "daemon", "system"]:
+    if name in os.listdir("/") + ["root", "home", "daemon", "system", "qubes"]:
         return False, _("User name is reserved for system: %s") % name
 
     return is_valid_name(name)
