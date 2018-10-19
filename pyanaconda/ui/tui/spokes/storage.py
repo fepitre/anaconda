@@ -50,7 +50,7 @@ from pyanaconda.bootloader import BootLoaderError
 from pyanaconda.storage.osinstall import storage_initialize
 
 from pykickstart.base import BaseData
-from pykickstart.constants import AUTOPART_TYPE_LVM
+from pykickstart.constants import AUTOPART_TYPE_LVM, AUTOPART_TYPE_LVM_THINP
 from pykickstart.errors import KickstartParseError
 
 from simpleline.render.containers import ListColumnContainer
@@ -421,7 +421,7 @@ class StorageSpoke(NormalTUISpoke):
         self._disk_init_observer.proxy.SetDrivesToClear(self.selected_disks)
 
         if self.autopart and self._auto_part_observer.proxy.Type == AUTOPART_TYPE_DEFAULT:
-            self._auto_part_observer.proxy.SetType(AUTOPART_TYPE_LVM)
+            self._auto_part_observer.proxy.SetType(AUTOPART_TYPE_LVM_THINP)
 
         for disk in self.disks:
             if disk.name not in self.selected_disks and \
