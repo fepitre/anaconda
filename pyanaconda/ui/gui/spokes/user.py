@@ -38,7 +38,7 @@ from pyanaconda.constants import ANACONDA_ENVIRON, FIRSTBOOT_ENVIRON,\
         PW_ASCII_CHARS, PASSWORD_ASCII
 from pyanaconda.regexes import GECOS_VALID, GROUPNAME_VALID, GROUPLIST_FANCY_PARSE
 
-__all__ = ["UserSpoke", "AdvancedUserDialog"]
+__all__ = ["UserSpoke"]
 
 class AdvancedUserDialog(GUIObject, GUIDialogInputCheckHandler):
     """
@@ -214,7 +214,7 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
     builderObjects = ["userCreationWindow"]
 
     mainWidgetName = "userCreationWindow"
-    focusWidgetName = "t_fullname"
+    focusWidgetName = "t_username"
     uiFile = "spokes/user.glade"
     helpFile = "UserSpoke.xml"
 
@@ -252,14 +252,16 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
         else:
             self._user = self.data.UserData()
 
+        self._wheel = self.data.GroupData(name="wheel")
+        self._qubes = self.data.GroupData(name="qubes")
+
+        self._groupDict = {"wheel": self._wheel, "qubes": self._qubes}
+
         # placeholders for the text boxes
-        self.fullname = self.builder.get_object("t_fullname")
         self.username = self.builder.get_object("t_username")
         self.pw = self.builder.get_object("t_password")
         self.confirm = self.builder.get_object("t_verifypassword")
-        self.admin = self.builder.get_object("c_admin")
         self.usepassword = self.builder.get_object("c_usepassword")
-        self.b_advanced = self.builder.get_object("b_advanced")
 
         # Counters for checks that ask the user to click Done to confirm
         self._waiveStrengthClicks = 0
@@ -306,8 +308,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
 
         self.add_check(self.username, self._checkUsername)
 
-        self.add_re_check(self.fullname, GECOS_VALID, _("Full name cannot contain colon characters"))
-
         # Modify the GUI based on the kickstart and policy information
         # This needs to happen after the input checks have been created, since
         # the Gtk signal handlers use the input check variables.
@@ -323,9 +323,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
             # User isn't allowed to change whether password is required or not
             self.usepassword.set_sensitive(False)
 
-        self._advanced = AdvancedUserDialog(self._user, self.data)
-        self._advanced.initialize()
-
         # set the visibility of the password entries
         set_password_visibility(self.pw, False)
         set_password_visibility(self.confirm, False)
@@ -336,8 +333,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
             check.enabled = True
 
         self.username.set_text(self._user.name)
-        self.fullname.set_text(self._user.gecos)
-        self.admin.set_active("wheel" in self._user.groups)
 
         self.pw.emit("changed")
         self.confirm.emit("changed")
@@ -378,7 +373,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
             self._password_kickstarted = False
 
         self._user.name = self.username.get_text()
-        self._user.gecos = self.fullname.get_text()
 
         if "wheel" not in self._user.groups:
             self._user.groups.append("wheel")
@@ -469,33 +463,9 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
     def username_changed(self, editable, data=None):
         """Called by Gtk on all username changes."""
 
-        # Disable the advanced user dialog button when no username is set
-        if editable.get_text():
-            self.b_advanced.set_sensitive(True)
-        else:
-            self.b_advanced.set_sensitive(False)
-
         # Re-run the password checks against the new username
         self.pw.emit("changed")
         self.confirm.emit("changed")
-
-    def full_name_changed(self, editable, data=None):
-        """Called by Gtk callback when the full name field changes."""
-
-        if self.guesser:
-            fullname = editable.get_text()
-            username = guess_username(fullname)
-
-            with blockedHandler(self.username, self.on_username_set_by_user):
-                self.username.set_text(username)
-
-    def on_admin_toggled(self, togglebutton, data=None):
-        # Add or remove "wheel" from the grouplist on changes to the admin checkbox
-        if togglebutton.get_active():
-            if "wheel" not in self._user.groups:
-                self._user.groups.append("wheel")
-        elif "wheel" in self._user.groups:
-            self._user.groups.remove("wheel")
 
     def _checkPasswordEmpty(self, inputcheck):
         """Check whether a password has been specified at all.
@@ -611,19 +581,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
             return InputCheck.CHECK_OK
         else:
             return msg or _("Invalid user name")
-
-    def on_advanced_clicked(self, _button, data=None):
-        """Handler for the Advanced.. button. It starts the Advanced dialog
-        for setting homedit, uid, gid and groups.
-        """
-
-        self._user.name = self.username.get_text()
-
-        self._advanced.refresh()
-        with self.main_window.enlightbox(self._advanced.window):
-            self._advanced.run()
-
-        self.admin.set_active("wheel" in self._user.groups)
 
     def on_back_clicked(self, button):
         # If the failed check is for non-ASCII characters,
