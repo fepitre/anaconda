@@ -252,6 +252,11 @@ class Authconfig(commands.authconfig.FC3_Authconfig):
             log.error("Error running %s %s: %s", cmd, args, msg)
 
 class AutoPart(commands.autopart.F21_AutoPart):
+    def __init__(self, writePriority=100, *args, **kwargs):
+        if 'encrypted' not in kwargs:
+            kwargs['encrypted'] = True
+        super(AutoPart, self).__init__(writePriority=writePriority, *args, **kwargs)
+
     def parse(self, args):
         retval = commands.autopart.F21_AutoPart.parse(self, args)
 
