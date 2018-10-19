@@ -1401,7 +1401,7 @@ class GRUB2(GRUB):
     _config_file = "grub.cfg"
     _config_dir = "grub2"
     defaults_file = "/etc/default/grub"
-    terminal_type = "console"
+    terminal_type = "gfxterm"
     stage2_max_end = None
 
     # requirements for boot devices
@@ -1503,7 +1503,7 @@ class GRUB2(GRUB):
         log.info("bootloader.py: used boot args: %s ", self.boot_args)
         defaults.write("GRUB_CMDLINE_LINUX=\"%s\"\n" % self.boot_args)
         defaults.write("GRUB_DISABLE_RECOVERY=\"true\"\n")
-        #defaults.write("GRUB_THEME=\"/boot/grub2/themes/system/theme.txt\"\n")
+        defaults.write("GRUB_THEME=\"/boot/grub2/themes/system/theme.txt\"\n")
         defaults.close()
 
     def _encrypt_password(self):
