@@ -1938,12 +1938,15 @@ class XenEFI(EFIGRUB):
             boot_part_num = self.stage1_device.parents[0].parted_partition.number
         boot_part_num = str(boot_part_num)
 
-        if not os.path.exists(
-                "{}/{}".format(util.getSysroot() + self.config_dir, "xen.efi")):
-            xen_efi = [x for x in os.listdir(util.getSysroot() + self.config_dir) if
-                       x.startswith('xen-') and x.endswith('.efi')][0]
-            shutil.copy("{}/{}".format(util.getSysroot() + self.config_dir, xen_efi),
-                        "{}/{}".format(util.getSysroot() + self.config_dir, "xen.efi"))
+        # could be an old version, replace in case
+        xen_efi_target = "{}/{}".format(util.getSysroot() + self.config_dir, "xen.efi")
+        if os.path.exists(xen_efi_target):
+            os.remove(xen_efi_target)
+
+        xen_efi = [x for x in os.listdir(util.getSysroot() + self.config_dir) if
+                   x.startswith('xen-') and x.endswith('.efi')][0]
+        shutil.copy("{}/{}".format(util.getSysroot() + self.config_dir, xen_efi),
+                    "{}/{}".format(util.getSysroot() + self.config_dir, "xen.efi"))
         rc = self.efibootmgr("-c", "-w", "-L", productName,
                              "-d", boot_disk.path, "-p", boot_part_num,
                              "-l",
