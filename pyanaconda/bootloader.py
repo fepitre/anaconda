@@ -1584,6 +1584,9 @@ class GRUB2(GRUB):
         except (BootLoaderError, OSError, RuntimeError) as e:
             log.error("boot loader password setup failed: %s", e)
 
+        # disable non-xen entries
+        os.chmod("%s/etc/grub.d/10_linux" % util.getSysroot(), 0o644)
+
         # make sure the default entry is the OS we are installing
         if self.default is not None:
             # find the index of the default image
