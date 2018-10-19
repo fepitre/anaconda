@@ -2170,37 +2170,8 @@ class Timezone(RemovedCommand):
         return timezone_proxy.GenerateKickstart()
 
     def setup(self, ksdata):
-        timezone_proxy = TIMEZONE.get_proxy()
-        services_proxy = SERVICES.get_proxy()
-
-        enabled_services = services_proxy.EnabledServices
-        disabled_services = services_proxy.DisabledServices
-
-        # do not install and use NTP package
-        if not timezone_proxy.NTPEnabled or NTP_PACKAGE in ksdata.packages.excludedList:
-            if util.service_running(NTP_SERVICE) and \
-                    can_touch_runtime_system("stop NTP service"):
-                ret = util.stop_service(NTP_SERVICE)
-                if ret != 0:
-                    timezone_log.error("Failed to stop NTP service")
-
-            if NTP_SERVICE not in disabled_services:
-                disabled_services.append(NTP_SERVICE)
-                services_proxy.SetDisabledServices(disabled_services)
-        # install and use NTP package
-        else:
-            if not util.service_running(NTP_SERVICE) and \
-                    can_touch_runtime_system("start NTP service"):
-                ret = util.start_service(NTP_SERVICE)
-                if ret != 0:
-                    timezone_log.error("Failed to start NTP service")
-
-            self.packages.append(NTP_PACKAGE)
-
-            if not NTP_SERVICE in enabled_services and \
-                    not NTP_SERVICE in disabled_services:
-                enabled_services.append(NTP_SERVICE)
-                services_proxy.SetEnabledServices(enabled_services)
+        ### Skip the whole NTP setup in Qubes dom0
+        return
 
     def execute(self, *args):
         # get the DBus proxies
