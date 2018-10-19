@@ -97,7 +97,9 @@ SHUT_UP_GCC="-Wno-unused-result"
 # Add remaining compiler flags we want to use
 CFLAGS="$CFLAGS -Wall -Werror $SHUT_UP_GCC"
 
-AC_SUBST(PACKAGE_RELEASE, [1])
+# Get the release number from the spec file
+rel="`awk '/^Release:/ { split($2, r, "%"); print r[[1]] }' $srcdir/anaconda.spec`"
+AC_SUBST(PACKAGE_RELEASE, [$rel])
 
 # Perform arch related tests
 AC_CANONICAL_BUILD
