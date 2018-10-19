@@ -40,11 +40,9 @@ class UserSpoke(FirstbootSpokeMixIn, EditTUISpoke):
 
     edit_fields = [
         Entry("Create user", "_create", EditTUISpoke.CHECK, True),
-        Entry("Fullname", "gecos", GECOS_VALID, lambda self, args: args._create),
         Entry("Username", "name", check_username, lambda self, args: args._create),
         Entry("Use password", "_use_password", EditTUISpoke.CHECK, lambda self, args: args._create),
         Entry("Password", "_password", EditTUISpoke.PASSWORD, lambda self, args: args._use_password and args._create),
-        Entry("Administrator", "_admin", EditTUISpoke.CHECK, lambda self, args: args._create),
         Entry("Groups", "_groups", GROUPLIST_SIMPLE_VALID, lambda self, args: args._create)
         ]
 
@@ -84,7 +82,6 @@ class UserSpoke(FirstbootSpokeMixIn, EditTUISpoke):
         self.errors = []
 
     def refresh(self, args=None):
-        self.args._admin = "wheel" in self.args.groups
         self.args._groups = ", ".join(self.args.groups)
 
         # if we have any errors, display them
@@ -146,22 +143,14 @@ class UserSpoke(FirstbootSpokeMixIn, EditTUISpoke):
         return EditTUISpoke.input(self, args, key)
 
     def apply(self):
-        if self.args.gecos and not self.args.name:
-            username = guess_username(self.args.gecos)
-            valid, msg = check_username(username)
-            if not valid:
-                self.errors.append(_("Invalid user name: %(name)s.\n%(error_message)s")
-                        % {"name": username, "error_message": msg})
-            else:
-                self.args.name = guess_username(self.args.gecos)
-
         self.args.groups = [g.strip() for g in self.args._groups.split(",") if g]
 
-        # Add or remove the user from wheel group
-        if self.args._admin and "wheel" not in self.args.groups:
+        # Add the user to the wheel and qubes groups
+        if "wheel" not in self.args.groups:
             self.args.groups.append("wheel")
-        elif not self.args._admin and "wheel" in self.args.groups:
-            self.args.groups.remove("wheel")
+
+        if "qubes" not in self.args.groups:
+            self.args.groups.append("qubes")
 
         # Add or remove the user from userlist as needed
         if self.args._create and (self.args not in self.data.user.userList and self.args.name):
