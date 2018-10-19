@@ -1437,6 +1437,8 @@ class GRUB2(GRUB):
     defaults_file = "/etc/default/grub"
     terminal_type = "gfxterm"
     stage2_max_end = None
+    can_dual_boot = True
+    can_update = True
 
     # requirements for boot devices
     stage2_device_types = ["partition", "mdarray", "lvmlv"]
