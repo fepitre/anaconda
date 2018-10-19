@@ -43,6 +43,8 @@ kickstart="$(getarg ks= inst.ks=)"
 
 [ -e "/dev/root" ] && exit 1 # we already have a root device!
 
+modprobe -q loop
+
 # If we're waiting for a cdrom kickstart, the user might need to swap discs.
 # So if this is a CDROM drive, make a note of it, but don't mount it (yet).
 # Once we get the kickstart either the udev trigger or disk-reinsertion will
