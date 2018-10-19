@@ -1943,10 +1943,10 @@ class XenEFI(EFIGRUB):
         if os.path.exists(xen_efi_target):
             os.remove(xen_efi_target)
 
-        xen_efi = [x for x in os.listdir(util.getSysroot() + self.config_dir) if
-                   x.startswith('xen-') and x.endswith('.efi')][0]
+        xen_efi = [x for x in sorted(os.listdir(util.getSysroot() + self.config_dir)) if
+                   x.startswith('xen-') and x.endswith('.efi')][-1]
         shutil.copy("{}/{}".format(util.getSysroot() + self.config_dir, xen_efi),
-                    "{}/{}".format(util.getSysroot() + self.config_dir, "xen.efi"))
+                    xen_efi_target)
         rc = self.efibootmgr("-c", "-w", "-L", productName,
                              "-d", boot_disk.path, "-p", boot_part_num,
                              "-l",
