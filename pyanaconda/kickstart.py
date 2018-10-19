@@ -1665,6 +1665,11 @@ class ReqPart(commands.reqpart.F23_ReqPart):
         do_reqpart(storage, reqs)
 
 class RootPw(commands.rootpw.F18_RootPw):
+    def __init__(self, writePriority=100, *args, **kwargs):
+        if 'lock' not in kwargs:
+            kwargs['lock'] = True
+        super(RootPw, self).__init__(writePriority=writePriority, *args, **kwargs)
+
     def execute(self, storage, ksdata, instClass, users):
         if not self.password and not flags.automatedInstall:
             self.lock = True
