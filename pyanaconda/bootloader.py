@@ -1785,7 +1785,8 @@ class EFIBase(object):
                     log.warning("failed to parse efi boot slot (%s)", slot)
                     continue
 
-                rc = self.efibootmgr("-b", slot_id, "-B")
+                rc = self.efibootmgr("-b", slot_id, "-B",
+                                     root=util.getSysroot())
                 if rc:
                     raise BootLoaderError("failed to remove old efi boot entry.  This is most likely a kernel or firmware bug.")
 
