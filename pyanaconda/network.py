@@ -56,7 +56,7 @@ networkConfFile = "%s/network" % (sysconfigDir)
 hostnameFile = "/etc/hostname"
 ipv6ConfFile = "/etc/sysctl.d/anaconda.conf"
 ifcfgLogFile = "/tmp/ifcfg.log"
-DEFAULT_HOSTNAME = "localhost.localdomain"
+DEFAULT_HOSTNAME = "dom0"
 
 ifcfglog = None
 
@@ -1355,6 +1355,7 @@ def write_sysconfig_network(rootpath, overwrite=False):
 
     with open(cfgfile, "w") as f:
         f.write("# Created by anaconda\n")
+        f.write("NETWORKING=no\n")
     return True
 
 def write_network_config(storage, ksdata, instClass, rootpath):
@@ -1363,18 +1364,19 @@ def write_network_config(storage, ksdata, instClass, rootpath):
 
     network_proxy = NETWORK.get_proxy()
     hostname = network_proxy.Hostname
-    write_hostname(rootpath, hostname, overwrite=overwrite)
+    write_hostname(rootpath, hostname, overwrite=flags.livecdInstall)
     if hostname != DEFAULT_HOSTNAME:
         set_hostname(hostname)
-    write_sysconfig_network(rootpath, overwrite=overwrite)
+    write_sysconfig_network(rootpath, overwrite=flags.livecdInstall)
     disable_ipv6_on_target_system(rootpath)
     copyIfcfgFiles(rootpath)
     copyDhclientConfFiles(rootpath)
     copyFileToPath("/etc/resolv.conf", rootpath, overwrite=overwrite)
-    instClass.setNetworkOnbootDefault(ksdata)
-    autostartFCoEDevices(rootpath, storage, ksdata)
 
-def update_hostname_data(ksdata, hostname):
+def update_hostname_data(ksdata, hostname=None):
+    if not hostname:
+        # Default to 'dom0' in Qubes
+        hostname = 'dom0'
     log.debug("updating host name %s", hostname)
     hostname_found = False
     for nd in ksdata.network.network:
