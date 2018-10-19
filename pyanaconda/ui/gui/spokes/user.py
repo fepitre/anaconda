@@ -29,7 +29,6 @@ from pyanaconda.modules.common.constants.services import USERS
 from pyanaconda.ui.gui.spokes import NormalSpoke
 from pyanaconda.ui.gui import GUIObject
 from pyanaconda.ui.categories.user_settings import UserSettingsCategory
-from pyanaconda.ui.common import FirstbootSpokeMixIn
 from pyanaconda.ui.helpers import InputCheck
 from pyanaconda.ui.gui.helpers import GUISpokeInputCheckHandler, GUIDialogInputCheckHandler
 from pyanaconda.ui.gui.utils import blockedHandler, set_password_visibility
@@ -206,7 +205,7 @@ class AdvancedUserDialog(GUIObject, GUIDialogInputCheckHandler):
 
         return False
 
-class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
+class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
     """
        .. inheritance-diagram:: UserSpoke
           :parts: 3
@@ -366,7 +365,7 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
     @property
     def status(self):
         if len(self.data.user.userList) == 0:
-            return _("No user will be created")
+            return _("User creation is required")
         elif "wheel" in self.data.user.userList[0].groups:
             return _("Administrator %s will be created") % self.data.user.userList[0].name
         else:
@@ -374,10 +373,7 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
 
     @property
     def mandatory(self):
-        """ Only mandatory if the root pw hasn't been set in the UI
-            eg. not mandatory if the root account was locked in a kickstart
-        """
-        return not self._users_module.proxy.IsRootPasswordSet and not self._users_module.proxy.IsRootAccountLocked
+        return True
 
     def apply(self):
         # set the password only if the user enters anything to the text entry
