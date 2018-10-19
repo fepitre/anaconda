@@ -1715,6 +1715,9 @@ class Timezone(commands.timezone.F25_Timezone):
         self._disabled_chrony = False
 
     def setup(self, ksdata):
+        ### Skip the whole NTP setup in Qubes dom0
+        return
+
         # do not install and use NTP package
         if self.nontp or NTP_PACKAGE in ksdata.packages.excludedList:
             if iutil.service_running(NTP_SERVICE) and \
