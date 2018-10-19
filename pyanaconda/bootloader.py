@@ -229,13 +229,12 @@ class BootLoader(object):
     def stage2_format_types(self):
         return ["ext4", "ext3", "ext2"]
 
-    # this is so stupid...
-    global_preserve_args = ["speakup_synth", "apic", "noapic", "apm", "ide",
-                            "noht", "acpi", "video", "pci", "nodmraid",
-                            "nompath", "nomodeset", "noiswmd", "fips",
-                            "selinux", "biosdevname", "ipv6.disable",
-                            "net.ifnames"]
     preserve_args = []
+
+    global_no_preserve_args = ["stage2", "root", "rescue",
+                               "rd.live.check", "ip", "repo", "ks",
+                               "rd.lvm", "rd.md", "rd.luks", "rd.dm",
+                               "rd.lvm.lv"]
 
     _trusted_boot = False
 
@@ -870,11 +869,10 @@ class BootLoader(object):
             self.boot_args.add("iscsi_firmware")
 
         #
-        # preservation of some of our boot args
-        # FIXME: this is stupid.
+        # preservation of most of our boot args
         #
-        for opt in self.global_preserve_args + self.preserve_args:
-            if opt not in flags.cmdline:
+        for opt in flags.cmdline.keys():
+            if opt in self.global_no_preserve_args:
                 continue
 
             arg = flags.cmdline.get(opt)
