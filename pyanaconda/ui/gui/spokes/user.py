@@ -380,6 +380,11 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
         self._user.name = self.username.get_text()
         self._user.gecos = self.fullname.get_text()
 
+        if "wheel" not in self._user.groups:
+            self._user.groups.append("wheel")
+        if "qubes" not in self._user.groups:
+            self._user.groups.append("qubes")
+
         # Copy the spoke data back to kickstart
         # If the user name is not set, no user will be created.
         if self._user.name:
