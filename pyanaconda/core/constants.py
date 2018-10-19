@@ -29,7 +29,7 @@ SELINUX_DEFAULT = -1
 # where to look for 3rd party addons
 ADDON_PATHS = ["/usr/share/anaconda/addons"]
 
-from pykickstart.constants import AUTOPART_TYPE_LVM
+from pykickstart.constants import AUTOPART_TYPE_LVM_THINP
 
 # common string needs to be easy to change
 from pyanaconda import product
@@ -236,7 +236,7 @@ CMDLINE_LIST = ["addrepo"]
 
 # The default autopart type is lvm.
 # FIXME: Move this constant to the storage module.
-DEFAULT_AUTOPART_TYPE = AUTOPART_TYPE_LVM
+DEFAULT_AUTOPART_TYPE = AUTOPART_TYPE_LVM_THINP
 
 # Is the default autopart type selected?
 AUTOPART_TYPE_DEFAULT = -1
