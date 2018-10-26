@@ -406,6 +406,9 @@ class AutoPart(RemovedCommand):
         refreshAutoSwapSize(storage)
         storage.do_autopart = True
 
+        # Make encrypted partitions by default  
+        auto_part_proxy.Encrypted = True
+
         if auto_part_proxy.Encrypted:
             storage.encrypted_autopart = True
             storage.encryption_passphrase = auto_part_proxy.Passphrase
