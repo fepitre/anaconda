@@ -18,7 +18,8 @@
 #
 
 from pyanaconda.installclass import BaseInstallClass
-from pyanaconda.modules.common.constants.services import NETWORK
+from pyanaconda.modules.common.constants.objects import AUTO_PARTITIONING
+from pyanaconda.modules.common.constants.services import NETWORK, STORAGE
 from pyanaconda.product import *
 from pyanaconda.core.i18n import N_
 import pyanaconda.platform
@@ -55,6 +56,10 @@ class InstallClass(BaseInstallClass):
         # Default Hostname
         network_proxy = NETWORK.get_proxy()
         network_proxy.SetHostname('dom0')
+
+        # Make encrypted partitions by default
+        auto_part_proxy = STORAGE.get_proxy(AUTO_PARTITIONING)
+        auto_part_proxy.SetEncrypted(True)
 
     def setDefaultPartitioning(self, storage):
         BaseInstallClass.setDefaultPartitioning(self, storage)
