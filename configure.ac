@@ -24,6 +24,8 @@ AC_INIT([anaconda], [29.24.7], [anaconda-devel-list@redhat.com])
 # (patch only builds, modular builds, mass-rebuilds, etc.)
 AC_ARG_VAR(ANACONDA_RELEASE, [1])
 
+ANACONDA_RELEASE="`awk '/^Release:/ { split($2, r, "%"); print r[[1]] }' $srcdir/anaconda.spec`"
+
 # default release to 1 if not set by option
 AS_IF([test $ANACONDA_RELEASE],
       [AC_SUBST(PACKAGE_RELEASE, $ANACONDA_RELEASE)],
