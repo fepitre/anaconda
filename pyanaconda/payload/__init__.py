@@ -886,23 +886,19 @@ class Payload(object):
 
 
     def recreateInitrds(self):
-        """Recreate the initrds by calling new-kernel-pkg
+        """Recreate the initrds by calling kernel-install
 
         This needs to be done after all configuration files have been
         written, since dracut depends on some of them.
 
         :returns: None
         """
-        if not os.path.exists(util.getSysroot() + "/usr/sbin/new-kernel-pkg"):
-            log.error("new-kernel-pkg does not exist - grubby wasn't installed?  skipping")
-            return
 
         for kernel in self.kernelVersionList:
             log.info("recreating initrd for %s", kernel)
             if not flags.imageInstall:
-                util.execInSysroot("new-kernel-pkg",
-                                   ["--mkinitrd", "--dracut",
-                                    "--depmod", "--update", kernel])
+                util.execInSysroot("kernel-install",
+                                    ["add", kernel, "/boot/vmlinuz-%s" % kernel])
             else:
                 # hostonly is not sensible for disk image installations
                 # using /dev/disk/by-uuid/ is necessary due to disk image naming
