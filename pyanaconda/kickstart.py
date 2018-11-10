@@ -2087,17 +2087,7 @@ class RootPw(RemovedCommand):
     def execute(self, storage, ksdata, instClass, users):
 
         users_proxy = USERS.get_proxy()
-
-        if flags.automatedInstall and not users_proxy.IsRootPasswordSet and not users_proxy.IsRootpwKickstarted:
-            # Lock the root password if during an installation with kickstart
-            # the root password is empty & not specififed as empty in the kickstart
-            # (seen == False) via the rootpw command.
-            # Note that kickstart is actually the only way to specify an empty
-            # root password - we don't allow that via the UI.
-            users_proxy.SetRootAccountLocked(True)
-        elif not flags.automatedInstall and not users_proxy.IsRootPasswordSet:
-            # Also lock the root password if it was not set during interactive installation.
-            users_proxy.SetRootAccountLocked(True)
+        users_proxy.SetRootAccountLocked(True)
 
         users.setRootPassword(users_proxy.RootPassword,
                               users_proxy.IsRootPasswordCrypted,
