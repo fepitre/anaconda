@@ -1448,12 +1448,13 @@ class GRUB2(GRUB):
     # XXX we probably need special handling for raid stage1 w/ gpt disklabel
     #     since it's unlikely there'll be a bios boot partition on each disk
 
-    @property
-    def stage2_format_types(self):
-        if productName.startswith("Red Hat "):              # pylint: disable=no-member
-            return ["xfs", "ext4", "ext3", "ext2"]
-        else:
-            return ["ext4", "ext3", "ext2", "btrfs", "xfs"]
+    stage2_format_types = ["ext4", "ext3", "ext2", "btrfs", "xfs"]
+
+    def __init__(self):
+        super().__init__()
+        self.encryption_support = True
+        self.stage2_format_types += ["lvmlv"]
+        self.skip_bootloader = flags.cmdline.getbool("skip_grub", False)
 
     #
     # grub-related conveniences
