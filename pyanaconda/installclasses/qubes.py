@@ -73,7 +73,6 @@ class InstallClass(BaseInstallClass):
         users_proxy = USERS.get_proxy()
         users_proxy.SetRootAccountLocked(True)
 
-
     def setDefaultPartitioning(self, storage):
         BaseInstallClass.setDefaultPartitioning(self, storage)
         for autoreq in storage.autopart_requests:
