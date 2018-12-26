@@ -214,7 +214,7 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
     builderObjects = ["userCreationWindow"]
 
     mainWidgetName = "userCreationWindow"
-    focusWidgetName = "fullname_entry"
+    focusWidgetName = "username_entry"
     uiFile = "spokes/user.glade"
     helpFile = "UserSpoke.xml"
 
@@ -259,15 +259,9 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
         # gather references to relevant GUI objects
 
         # entry fields
-        self._fullname_entry = self.builder.get_object("fullname_entry")
         self._username_entry = self.builder.get_object("username_entry")
         self._password_entry = self.builder.get_object("password_entry")
         self._password_confirmation_entry = self.builder.get_object("password_confirmation_entry")
-        # check boxes
-        self._admin_checkbox = self.builder.get_object("admin_checkbox")
-        self._password_required_checkbox = self.builder.get_object("password_required_checkbox")
-        # advanced user configration dialog button
-        self._advanced_button = self.builder.get_object("advanced_button")
         # password checking status bar & label
         self._password_bar = self.builder.get_object("password_bar")
         self._password_label = self.builder.get_object("password_label")
@@ -295,7 +289,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
 
         # username and full name checks
         self._username_check = input_checking.UsernameCheck()
-        self._fullname_check = input_checking.FullnameCheck()
         # empty username is considered a success so that the user can leave
         # the spoke without filling it in
         self._username_check.success_if_username_empty = True
@@ -320,7 +313,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
         # 3) is the password valid according to the current password checking policy ?
         # 4) is the password free of non-ASCII characters ?
         self.checker.add_check(self._username_check)
-        self.checker.add_check(self._fullname_check)
         self.checker.add_check(self._empty_check)
         self.checker.add_check(self._confirm_check)
         self.checker.add_check(self._validity_check)
@@ -343,19 +335,8 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
         # the Gtk signal handlers use the input check variables.
         password_set_message = _("The password was set by kickstart.")
         if self.password_kickstarted:
-            self.password_required = True
             self.password_entry.set_placeholder_text(password_set_message)
             self.password_confirmation_entry.set_placeholder_text(password_set_message)
-        elif not self.checker.policy.emptyok:
-            # Policy is that a non-empty password is required
-            self.password_required = True
-
-        if not self.checker.policy.emptyok:
-            # User isn't allowed to change whether password is required or not
-            self.password_required_checkbox.set_sensitive(False)
-
-        self._advanced_user_dialog = AdvancedUserDialog(self._user, self.data)
-        self._advanced_user_dialog.initialize()
 
         # set the visibility of the password entries
         set_password_visibility(self.password_entry, False)
@@ -376,34 +357,8 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
     def username(self, new_username):
         self.username_entry.set_text(new_username)
 
-    @property
-    def fullname_entry(self):
-        return self._fullname_entry
-
-    @property
-    def fullname(self):
-        return self.fullname_entry.get_text()
-
-    @fullname.setter
-    def fullname(self, new_fullname):
-        self.fullname_entry.set_text(new_fullname)
-
-    @property
-    def password_required_checkbox(self):
-        return self._password_required_checkbox
-
-    @property
-    def password_required(self):
-        return self.password_required_checkbox.get_active()
-
-    @password_required.setter
-    def password_required(self, value):
-        self.password_required_checkbox.set_active(value)
-
     def refresh(self):
         self.username = self._user.name
-        self.fullname = self._user.gecos
-        self._admin_checkbox.set_active("wheel" in self._user.groups)
 
         # rerun checks so that we have a correct status message, if any
         self.checker.run_checks()
@@ -427,22 +382,13 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
     def apply(self):
         # set the password only if the user enters anything to the text entry
         # this should preserve the kickstart based password
-        if self.password_required:
-            if self.password:
-                self.password_kickstarted = False
-                self._user.password = cryptPassword(self.password)
-                self._user.isCrypted = True
-                self.remove_placeholder_texts()
-
-        # reset the password when the user unselects it
-        else:
-            self.remove_placeholder_texts()
-            self._user.password = ""
-            self._user.isCrypted = False
+        if self.password:
             self.password_kickstarted = False
+            self._user.password = cryptPassword(self.password)
+            self._user.isCrypted = True
+            self.remove_placeholder_texts()
 
         self._user.name = self.username
-        self._user.gecos = self.fullname
 
         # Copy the spoke data back to kickstart
         # If the user name is not set, no user will be created.
@@ -466,22 +412,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
     def completed(self):
         return len(self.data.user.userList) > 0
 
-    def password_required_toggled(self, togglebutton=None, data=None):
-        """Called by Gtk callback when the "Use password" check
-        button is toggled. It will make password entries in/sensitive."""
-        password_is_required = togglebutton.get_active()
-        self.password_entry.set_sensitive(password_is_required)
-        self.password_confirmation_entry.set_sensitive(password_is_required)
-
-        # also disable/enable corresponding password checks
-        self._empty_check.skip = not password_is_required
-        self._confirm_check.skip = not password_is_required
-        self._validity_check.skip = not password_is_required
-        self._ascii_check.skip = not password_is_required
-
-        # and rerun the checks
-        self.checker.run_checks()
-
     def on_password_icon_clicked(self, entry, icon_pos, event):
         """Called by Gtk callback when the icon of a password entry is clicked."""
         set_password_visibility(entry, not entry.get_visibility())
@@ -503,12 +433,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
         """Called by Gtk on all username changes."""
         new_username = editable.get_text()
 
-        # Disable the advanced user dialog button when no username is set
-        if editable.get_text():
-            self._advanced_button.set_sensitive(True)
-        else:
-            self._advanced_button.set_sensitive(False)
-
         # update the username in checker
         self.checker.username = new_username
 
@@ -519,41 +443,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
         self._validity_check.skip = not new_username
         # Re-run the password checks against the new username
         self.checker.run_checks()
-
-    def on_full_name_changed(self, editable, data=None):
-        """Called by Gtk callback when the full name field changes."""
-
-        fullname = editable.get_text()
-        if self.guesser:
-            username = guess_username(fullname)
-            with blockedHandler(self.username_entry, self.on_username_set_by_user):
-                self.username = username
-
-        self.checker.fullname = fullname
-
-        # rerun the checks
-        self.checker.run_checks()
-
-    def on_admin_toggled(self, togglebutton, data=None):
-        # Add or remove "wheel" from the grouplist on changes to the admin checkbox
-        if togglebutton.get_active():
-            if "wheel" not in self._user.groups:
-                self._user.groups.append("wheel")
-        elif "wheel" in self._user.groups:
-            self._user.groups.remove("wheel")
-
-    def on_advanced_clicked(self, _button, data=None):
-        """Handler for the Advanced.. button. It starts the Advanced dialog
-        for setting homedir, uid, gid and groups.
-        """
-
-        self._user.name = self.username
-
-        self._advanced_user_dialog.refresh()
-        with self.main_window.enlightbox(self._advanced_user_dialog.window):
-            self._advanced_user_dialog.run()
-
-        self._admin_checkbox.set_active("wheel" in self._user.groups)
 
     def _checks_done(self, error_message):
         """Update the warning with the input validation error from the first
@@ -566,7 +455,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
         # check if an unwaivable check failed
         unwaivable_checks = [not self._confirm_check.result.success,
                              not self._username_check.result.success,
-                             not self._fullname_check.result.success,
                              not self._empty_check.result.success]
         # with emptyok == False the empty password check become unwaivable
         #if not self.checker.policy.emptyok:
