@@ -19,7 +19,7 @@
 
 from pyanaconda.installclass import BaseInstallClass
 from pyanaconda.modules.common.constants.objects import AUTO_PARTITIONING
-from pyanaconda.modules.common.constants.services import STORAGE
+from pyanaconda.modules.common.constants.services import STORAGE, TIMEZONE
 from pyanaconda.product import *
 from pyanaconda.core.i18n import N_
 import pyanaconda.platform
@@ -56,6 +56,10 @@ class InstallClass(BaseInstallClass):
         # Make encrypted partitions by default
         auto_part_proxy = STORAGE.get_proxy(AUTO_PARTITIONING)
         auto_part_proxy.SetEncrypted(True)
+
+        # Make disabled NTP by default
+        timezone_proxy = TIMEZONE.get_proxy()
+        timezone_proxy.SetNTPEnabled(False)
 
     def setDefaultPartitioning(self, storage):
         BaseInstallClass.setDefaultPartitioning(self, storage)
