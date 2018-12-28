@@ -23,6 +23,7 @@ from pyanaconda.modules.common.constants.services import STORAGE, TIMEZONE
 from pyanaconda.product import *
 from pyanaconda.core.i18n import N_
 import pyanaconda.platform
+from pykickstart.constants import AUTOPART_TYPE_LVM_THINP
 
 from blivet.size import Size
 from pyanaconda.platform import platform
@@ -56,6 +57,9 @@ class InstallClass(BaseInstallClass):
         # Make encrypted partitions by default
         auto_part_proxy = STORAGE.get_proxy(AUTO_PARTITIONING)
         auto_part_proxy.SetEncrypted(True)
+
+        # Make LVM Thin the default for autopart
+        auto_part_proxy.SetType(AUTOPART_TYPE_LVM_THINP)
 
         # Make disabled NTP by default
         timezone_proxy = TIMEZONE.get_proxy()
