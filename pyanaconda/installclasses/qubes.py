@@ -18,6 +18,7 @@
 #
 
 from pyanaconda.installclass import BaseInstallClass
+from pyanaconda.modules.common.constants.services import NETWORK
 from pyanaconda.product import *
 from pyanaconda.core.i18n import N_
 import pyanaconda.platform
@@ -50,6 +51,10 @@ class InstallClass(BaseInstallClass):
     def configure(self, anaconda):
         BaseInstallClass.configure(self, anaconda)
         self.setDefaultPartitioning(anaconda.storage)
+
+        # Default Hostname
+        network_proxy = NETWORK.get_proxy()
+        network_proxy.SetHostname('dom0')
 
     def setDefaultPartitioning(self, storage):
         BaseInstallClass.setDefaultPartitioning(self, storage)
