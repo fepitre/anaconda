@@ -184,18 +184,6 @@ def nm_devices():
 
     interfaces = []
 
-    proxy = _get_proxy()
-    if not proxy:
-        return []
-
-    devices = proxy.GetDevices()
-    for device in devices:
-        device_type = _get_property(device, "DeviceType", ".Device")
-        if device_type not in supported_device_types:
-            continue
-        iface = _get_property(device, "Interface", ".Device")
-        interfaces.append(iface)
-
     return interfaces
 
 def nm_activated_devices():
