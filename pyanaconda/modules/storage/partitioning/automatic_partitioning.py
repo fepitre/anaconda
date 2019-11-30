@@ -81,6 +81,25 @@ WORKSTATION_PARTITIONING = [
     )
 ]
 
+# Partitioning requirements for QubesOS.
+QUBESOS_PARTITIONING = [
+    PartSpec(
+        mountpoint="/",
+        size=Size("1GiB"),
+        required_space=Size("10GiB"),
+        grow=True,
+        btr=True,
+        lv=True,
+        thin=True,
+        encrypted=True),
+    PartSpec(
+        fstype="swap",
+        grow=False,
+        lv=True,
+        encrypted=True
+    )
+]
+
 
 def get_default_partitioning(partitioning_type=None):
     """Get the default partitioning requests.
@@ -96,6 +115,9 @@ def get_default_partitioning(partitioning_type=None):
 
     if partitioning_type is PartitioningType.WORKSTATION:
         return platform.set_default_partitioning() + WORKSTATION_PARTITIONING
+
+    if partitioning_type is PartitioningType.QUBESOS:
+        return platform.set_default_partitioning() + QUBESOS_PARTITIONING
 
     raise ValueError("Invalid partitioning type: {}".format(conf.storage.default_partitioning))
 
