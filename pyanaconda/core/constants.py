@@ -164,8 +164,10 @@ WARNING_SUPPORT_REMOVED = N_(
 )
 
 WARNING_HARDWARE_UNSUPPORTED = N_(
-    "This hardware (or a combination thereof) is not supported by Red Hat. For more information "
-    "on supported hardware, please refer to http://www.redhat.com/hardware."
+    "This hardware lacks features required by Qubes OS. Missing features: %(features)s. Without "
+    "these features, Qubes OS will not function normally. It is recommended that only developers "
+    "and power users proceed with the installation. For more information on supported "
+    "hardware, please refer to https://www.qubes-os.org/doc/system-requirements/"
 )
 
 # Storage messages
