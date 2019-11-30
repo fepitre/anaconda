@@ -973,10 +973,31 @@ def detect_unsupported_hardware():
         return []
 
     # Check TAINT_HARDWARE_UNSUPPORTED
-    if not conf.system.can_detect_unsupported_hardware:
-        log.debug("This system doesn't support TAINT_HARDWARE_UNSUPPORTED.")
-    elif get_kernel_taint(TAINT_HARDWARE_UNSUPPORTED):
-        warnings.append(WARNING_HARDWARE_UNSUPPORTED)
+    try:
+        xl_info = subprocess.check_output(['xl', 'info'])
+        xl_dmesg = subprocess.check_output(['xl', 'dmesg'])
+    except subprocess.CalledProcessError:
+        warnings.append('Unable to check hardware support: xl call failed')
+    else:
+        missing_features = []
+        for line in xl_info.splitlines():
+            if line.startswith(b'virt_caps'):
+                if b'hvm' not in line:
+                    missing_features.append('HVM/VT-x/AMD-V')
+                if b'hvm_directio' not in line:
+                    missing_features.append('IOMMU/VT-d/AMD-Vi')
+
+        if b'HVM: Hardware Assisted Paging (HAP) detected' not in xl_dmesg:
+            missing_features.append('HAP/SLAT/EPT/RVI')
+
+        # slightly different wording for Intel and AMD
+        if b'Intel VT-d Interrupt Remapping enabled' not in xl_dmesg \
+                and b'Interrupt remapping enabled' not in xl_dmesg:
+            missing_features.append('Interrupt Remapping')
+
+        if missing_features:
+            status = ', '.join(missing_features)
+            warnings.append(WARNING_HARDWARE_UNSUPPORTED % {'features': status})
 
     # Check TAINT_SUPPORT_REMOVED
     if not conf.system.can_detect_support_removed:
