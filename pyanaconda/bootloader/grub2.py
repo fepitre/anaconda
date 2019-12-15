@@ -105,7 +105,7 @@ class GRUB2(BootLoader):
     _config_dir = "grub2"
     _passwd_file = "user.cfg"
     defaults_file = "/etc/default/grub"
-    terminal_type = "console"
+    terminal_type = "gfxterm"
     stage2_max_end = None
 
     _device_map_file = "device.map"
@@ -269,7 +269,7 @@ class GRUB2(BootLoader):
         log.info("bootloader.py: used boot args: %s ", self.boot_args)
         defaults.write("GRUB_CMDLINE_LINUX=\"%s\"\n" % self.boot_args)
         defaults.write("GRUB_DISABLE_RECOVERY=\"true\"\n")
-        #defaults.write("GRUB_THEME=\"/boot/grub2/themes/system/theme.txt\"\n")
+        defaults.write("GRUB_THEME=\"/boot/grub2/themes/qubes/theme.txt\"\n")
 
         if self.use_bls and os.path.exists(conf.target.system_root + "/usr/sbin/new-kernel-pkg"):
             log.warning("BLS support disabled due new-kernel-pkg being present")
