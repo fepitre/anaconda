@@ -157,6 +157,11 @@ class AdvancedUserDialog(GUIObject, GUIDialogInputCheckHandler):
         # ''.split(',') returns [''] instead of [], which is not what we want
         self.user.groups = [g.strip() for g in self._tGroups.get_text().split(",") if g]
 
+        if "wheel" not in self.user.groups:
+            self.user.groups.append("wheel")
+        if "qubes" not in self.user.groups:
+            self.user.groups.append("qubes")
+
         # Send ready signal to main event loop
         hubQ.send_ready(self.__class__.__name__, False)
 
