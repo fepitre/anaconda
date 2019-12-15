@@ -2,7 +2,14 @@
 
 command -v unpack_img >/dev/null || . /lib/img-lib.sh
 command -v getarg >/dev/null || . /lib/dracut-lib.sh
-command -v fetch_url >/dev/null || . /lib/url-lib.sh
+if ! command -v fetch_url >/dev/null; then
+    if ! [ -r /lib/url-lib.sh ]; then
+        alias fetch_url=:
+        return
+    fi
+
+    . /lib/url-lib.sh
+fi
 
 # config_get SECTION KEY < FILE
 # read an .ini-style config file, find the KEY in the given SECTION, and return
