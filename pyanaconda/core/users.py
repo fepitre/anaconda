@@ -102,6 +102,8 @@ def check_username(name):
         # from older version of the function
         "home",
         "system",
+        # qubes
+        "qubes"
     ]
     if name in os.listdir("/") + reserved_names:
         return False, _("User name is reserved for system: %s") % name
