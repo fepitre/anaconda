@@ -38,8 +38,7 @@ __all__ = ["UserSpoke"]
 
 FULLNAME_ERROR_MSG = N_("Full name can't contain the ':' character")
 
-
-class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
+class UserSpoke(NormalTUISpoke):
     """
        .. inheritance-diagram:: UserSpoke
           :parts: 3
@@ -49,9 +48,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
 
     @classmethod
     def should_run(cls, environment, data):
-        if FirstbootSpokeMixIn.should_run(environment, data):
-            return True
-
         # the user spoke should run always in the anaconda and in firstboot only
         # when doing reconfig or if no user has been created in the installation
         users_module = USERS.get_proxy()
@@ -62,7 +58,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
         return False
 
     def __init__(self, data, storage, payload):
-        FirstbootSpokeMixIn.__init__(self)
         NormalTUISpoke.__init__(self, data, storage, payload)
 
         self.initialize_start()
@@ -218,7 +213,7 @@ class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
     @property
     def mandatory(self):
         """Only mandatory if no admin user has been requested."""
-        return not self._users_module.CheckAdminUserExists()
+        return not flags.automatedInstall
 
     @property
     def status(self):
