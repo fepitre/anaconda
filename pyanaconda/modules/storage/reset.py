@@ -54,9 +54,6 @@ class StorageResetTask(Task):
         if conf.target.is_image:
             return
 
-        iscsi.startup()
-        fcoe.startup()
-
         if arch.is_s390():
             zfcp.startup()
 
