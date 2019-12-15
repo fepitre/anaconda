@@ -663,7 +663,7 @@ class PackagePayload(Payload, metaclass=ABCMeta):
                          if fnmatch(f, "/boot/vmlinuz-*") or
                          fnmatch(f, "/boot/efi/EFI/%s/vmlinuz-*" % conf.bootloader.efi_dir)))
 
-        return sorted(files, key=functools.cmp_to_key(payload_utils.version_cmp))
+        return sorted(set(files), key=functools.cmp_to_key(payload_utils.version_cmp))
 
     @property
     def rpm_macros(self):
