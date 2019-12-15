@@ -272,6 +272,8 @@ class GRUB2(BootLoader):
         defaults.write("GRUB_CMDLINE_LINUX=\"%s\"\n" % self.boot_args)
         defaults.write("GRUB_DISABLE_RECOVERY=\"true\"\n")
         defaults.write("GRUB_THEME=\"/boot/grub2/themes/qubes/theme.txt\"\n")
+        defaults.write("GRUB_CMDLINE_XEN_DEFAULT=\"console=none dom0_mem=min:1024M dom0_mem=max:4096M iommu=no-igfx ucode=scan smt=off gnttab_max_frames=2048 gnttab_max_maptrack_frames=4096\"\n")
+        defaults.write("GRUB_DISABLE_OS_PROBER=\"true\"\n")
 
         if self.use_bls and os.path.exists(conf.target.system_root + "/usr/sbin/new-kernel-pkg"):
             log.warning("BLS support disabled due new-kernel-pkg being present")
