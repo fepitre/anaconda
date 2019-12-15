@@ -39,8 +39,7 @@ __all__ = ["UserSpoke"]
 
 FULLNAME_ERROR_MSG = N_("Full name can't contain the ':' character")
 
-
-class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
+class UserSpoke(NormalTUISpoke):
     """
        .. inheritance-diagram:: UserSpoke
           :parts: 3
@@ -71,7 +70,6 @@ class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
         return False
 
     def __init__(self, data, storage, payload):
-        FirstbootSpokeMixIn.__init__(self)
         NormalTUISpoke.__init__(self, data, storage, payload)
 
         self.initialize_start()
@@ -228,15 +226,8 @@ class UserSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
 
     @property
     def mandatory(self):
-        """The spoke is mandatory only if some input is missing.
-
-        Possible reasons to be mandatory:
-        - No admin user has been created
-        - Password has been requested but not entered
-        """
-        return (not self._users_module.CheckAdminUserExists() or
-                (self._use_password and not bool(self.user.password or
-                                                 self.user.is_crypted)))
+        """Only mandatory if no admin user has been requested."""
+        return not flags.automatedInstall
 
     @property
     def status(self):
