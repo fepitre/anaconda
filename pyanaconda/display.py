@@ -19,6 +19,7 @@
 #
 # Author(s):  Martin Kolman <mkolman@redhat.com>
 #
+import sys
 import os
 import subprocess
 import time
@@ -381,26 +382,14 @@ def setup_display(anaconda, options):
         try:
             start_x11(xtimeout)
             do_startup_x11_actions()
-        except TimeoutError as e:
-            log.warning("X startup failed: %s", e)
-            print("\nX did not start in the expected time, falling back to text mode. There are "
-                  "multiple ways to avoid this issue:")
-            wrapper = textwrap.TextWrapper(initial_indent=" * ", subsequent_indent="   ",
-                                           width=os.get_terminal_size().columns - 3)
-            for line in X_TIMEOUT_ADVICE.split("\n"):
-                print(wrapper.fill(line))
-            util.vtActivate(1)
-            anaconda.display_mode = constants.DisplayModes.TUI
-            anaconda.gui_startup_failed = True
-            time.sleep(2)
-
-        except (OSError, RuntimeError) as e:
-            log.warning("X or window manager startup failed: %s", e)
-            print("\nX or window manager startup failed, falling back to text mode.")
-            util.vtActivate(1)
-            anaconda.display_mode = constants.DisplayModes.TUI
-            anaconda.gui_startup_failed = True
-            time.sleep(2)
+        except (OSError, RuntimeError, TimeoutError) as e:
+            log.warning("X startup failed, aborting installation")
+            stdout_log.error("X startup failed, aborting installation")
+            print(_("The installation cannot continue and the system will be rebooted"))
+            print(_("Press ENTER to continue"))
+            input()
+            util.ipmi_report(constants.IPMI_ABORTED)
+            sys.exit(1)
 
         if not anaconda.gui_startup_failed:
             do_extra_x11_actions(options.runres, gui_mode=anaconda.gui_mode)
