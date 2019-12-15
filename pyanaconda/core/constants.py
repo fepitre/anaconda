@@ -259,8 +259,8 @@ CMDLINE_APPEND = ["modprobe.blacklist", "ifname", "ip"]
 CMDLINE_LIST = ["addrepo"]
 
 # The default autopart type is LVM.
-from pykickstart.constants import AUTOPART_TYPE_LVM
-DEFAULT_AUTOPART_TYPE = AUTOPART_TYPE_LVM
+from pykickstart.constants import AUTOPART_TYPE_LVM_THINP
+DEFAULT_AUTOPART_TYPE = AUTOPART_TYPE_LVM_THINP
 
 # Filesystems which are not supported by Anaconda
 UNSUPPORTED_FILESYSTEMS = ("btrfs", "ntfs", "tmpfs")
