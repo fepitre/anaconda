@@ -522,33 +522,18 @@ class Payload(metaclass=ABCMeta):
         return False
 
     def recreate_initrds(self):
-        """Recreate the initrds by calling new-kernel-pkg or dracut
+        """Recreate the initrds by calling kernel-install or dracut
 
         This needs to be done after all configuration files have been
         written, since dracut depends on some of them.
 
         :returns: None
         """
-        if os.path.exists(conf.target.system_root + "/usr/sbin/new-kernel-pkg"):
-            use_dracut = False
-        else:
-            log.warning("new-kernel-pkg does not exist - grubby wasn't installed? "
-                        " using dracut instead.")
-            use_dracut = True
-
         for kernel in self.kernel_version_list:
             log.info("recreating initrd for %s", kernel)
             if not conf.target.is_image:
-                if use_dracut:
-                    util.execInSysroot("depmod", ["-a", kernel])
-                    util.execInSysroot("dracut",
-                                       ["-f",
-                                        "/boot/initramfs-%s.img" % kernel,
-                                        kernel])
-                else:
-                    util.execInSysroot("new-kernel-pkg",
-                                       ["--mkinitrd", "--dracut", "--depmod",
-                                        "--update", kernel])
+                util.execInSysroot("kernel-install",
+                                   ["add", kernel, "/boot/vmlinuz-%s" % kernel])
 
                 # if the installation is running in fips mode then make sure
                 # fips is also correctly enabled in the installed system
