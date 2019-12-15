@@ -817,11 +817,13 @@ class BootLoader(object):
 
     def _preserve_some_boot_args(self):
         """Preserve some of the boot args."""
-        for opt in conf.bootloader.preserved_arguments:
-            if opt not in kernel_arguments:
+        global_no_preserve_args = ["stage2", "root", "rescue", "rd.live.check",
+                                   "ip", "repo", "ks", "rd.md", "rd.luks",
+                                   "rd.dm", "rd.lvm.lv", "rd.lvm", "rd.neednet"]
+        for opt, arg in kernel_arguments.items():
+            if opt in global_no_preserve_args:
                 continue
 
-            arg = kernel_arguments.get(opt)
             new_arg = opt
             if arg:
                 new_arg += "=%s" % arg
