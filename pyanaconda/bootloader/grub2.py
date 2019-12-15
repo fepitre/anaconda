@@ -26,6 +26,7 @@ from pyanaconda.core import util
 from pyanaconda.core.configuration.anaconda import conf
 from pyanaconda.core.i18n import _
 from pyanaconda.product import productName
+from pyanaconda.flags import flags
 
 from pyanaconda.anaconda_loggers import get_module_logger
 log = get_module_logger(__name__)
@@ -129,6 +130,8 @@ class GRUB2(BootLoader):
     def __init__(self):
         super().__init__()
         self.encrypted_password = ""
+        self.encryption_support = True
+        self.skip_bootloader = flags.cmdline.getbool("skip_grub", False)
 
     #
     # configuration
@@ -186,7 +189,7 @@ class GRUB2(BootLoader):
         if productName.startswith("Red Hat "): # pylint: disable=no-member
             return ["xfs", "ext4", "ext3", "ext2"]
         else:
-            return ["ext4", "ext3", "ext2", "btrfs", "xfs"]
+            return ["ext4", "ext3", "ext2", "btrfs", "xfs", "lvmlv"]
 
     #
     # grub-related conveniences
