@@ -28,7 +28,6 @@ from pyanaconda.modules.common.constants.services import USERS
 from pyanaconda.ui.gui.spokes import NormalSpoke
 from pyanaconda.ui.gui import GUIObject
 from pyanaconda.ui.categories.user_settings import UserSettingsCategory
-from pyanaconda.ui.common import FirstbootSpokeMixIn
 from pyanaconda.ui.helpers import InputCheck
 from pyanaconda.ui.gui.helpers import GUISpokeInputCheckHandler, GUIDialogInputCheckHandler
 from pyanaconda.ui.gui.utils import blockedHandler, set_password_visibility
@@ -43,7 +42,7 @@ log = get_module_logger(__name__)
 __all__ = ["UserSpoke"]
 
 
-class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
+class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
     """
        .. inheritance-diagram:: UserSpoke
           :parts: 3
@@ -240,7 +239,7 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
     @property
     def mandatory(self):
         """Only mandatory if no admin user has been requested."""
-        return not self._users_module.CheckAdminUserExists()
+        return True
 
     def apply(self):
         # set the password only if the user enters anything to the text entry
