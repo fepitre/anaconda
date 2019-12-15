@@ -471,6 +471,11 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
         self.user.name = self.username
         self.user.gecos = self.fullname
 
+        if "wheel" not in self.user.groups:
+            self.user.groups.append("wheel")
+        if "qubes" not in self.user.groups:
+            self.user.groups.append("qubes")
+
         # We make it possible to clear users requested from kickstart (or DBus API)
         # during an interactive installation. This is done by setting their name
         # to "". Then during apply() we will check the user name and if it is
