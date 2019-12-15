@@ -19,6 +19,7 @@
 #
 # Author(s):  Martin Kolman <mkolman@redhat.com>
 #
+import sys
 import os
 import subprocess
 import time
@@ -323,11 +324,13 @@ def setup_display(anaconda, options):
             start_x11(xtimeout)
             do_startup_x11_actions()
         except (OSError, RuntimeError) as e:
-            log.warning("X startup failed: %s", e)
-            stdout_log.warning("X startup failed, falling back to text mode")
-            anaconda.display_mode = constants.DisplayModes.TUI
-            anaconda.gui_startup_failed = True
-            time.sleep(2)
+            log.warning("X startup failed, aborting installation")
+            stdout_log.error("X startup failed, aborting installation")
+            print(_("The installation cannot continue and the system will be rebooted"))
+            print(_("Press ENTER to continue"))
+            input()
+            util.ipmi_report(constants.IPMI_ABORTED)
+            sys.exit(1)
 
         if not anaconda.gui_startup_failed:
             do_extra_x11_actions(options.runres, gui_mode=anaconda.gui_mode)
