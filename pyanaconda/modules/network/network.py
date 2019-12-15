@@ -472,19 +472,6 @@ class NetworkService(KickstartService):
         """
         # TODO guard on system (provides_system_bus)
         supported_devices = []
-        if not self.nm_available:
-            log.debug("Supported devices can't be determined.")
-            return supported_devices
-
-        for device in self.nm_client.get_devices():
-            if device.get_device_type() not in supported_device_types:
-                continue
-            dev_info = NetworkDeviceInfo()
-            dev_info.set_from_nm_device(device)
-            if not all((dev_info.device_name, dev_info.device_type, dev_info.hw_address)):
-                log.warning("Missing value when setting NetworkDeviceInfo from NM device: %s",
-                            dev_info)
-            supported_devices.append(dev_info)
 
         return supported_devices
 
