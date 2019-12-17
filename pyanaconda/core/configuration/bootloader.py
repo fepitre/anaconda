@@ -69,3 +69,18 @@ class BootloaderSection(Section):
         :return: a list of kernel arguments
         """
         return self._get_option("preserved_arguments", str).split()
+
+    @property
+    def extra_boot_args(self):
+        """Extra boot args to add to GRUB_CMDLINE_LINUX"""
+        return self._get_option("extra_boot_args", str).split()
+
+    @property
+    def extra_grub_vars(self):
+        """Extra GRUB vars to be added
+
+        Allow adding extra GRUB options. For example:
+        GRUB_THEME, GRUB_DISABLE_OS_PROBER, etc.
+
+        """
+        return self._get_option("extra_grub_vars", str).split(';')

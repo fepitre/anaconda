@@ -264,10 +264,21 @@ class GRUB2(BootLoader):
         # this is going to cause problems for systems containing multiple
         # linux installations or even multiple boot entries with different
         # boot arguments
-        log.info("bootloader.py: used boot args: %s ", self.boot_args)
-        defaults.write("GRUB_CMDLINE_LINUX=\"%s\"\n" % self.boot_args)
+        boot_args = self.boot_args
+        if conf.bootloader.extra_boot_args:
+            boot_args += conf.bootloader.extra_boot_args
+        log.info("bootloader.py: used boot args: %s ", boot_args)
+        defaults.write("GRUB_CMDLINE_LINUX=\"%s\"\n" % boot_args)
         defaults.write("GRUB_DISABLE_RECOVERY=\"true\"\n")
         #defaults.write("GRUB_THEME=\"/boot/grub2/themes/system/theme.txt\"\n")
+
+        if conf.bootloader.extra_grub_vars:
+            for extra_conf in conf.bootloader.extra_grub_vars:
+                extra_conf = extra_conf.split('=')
+                if len(extra_conf) == 2:
+                    extra_grub_var = extra_conf[0]
+                    extra_grub_value = extra_conf[1]
+                    defaults.write("%s=\"%s\"\n" % (extra_grub_var, extra_grub_value))
 
         if self.use_bls and os.path.exists(conf.target.system_root + "/usr/sbin/new-kernel-pkg"):
             log.warning("BLS support disabled due new-kernel-pkg being present")
