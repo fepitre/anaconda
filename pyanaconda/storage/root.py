@@ -26,6 +26,7 @@ from pyanaconda.core import util
 from pyanaconda.core.configuration.anaconda import conf
 from pyanaconda.core.i18n import _
 from pyanaconda.storage.fsset import BlkidTab, CryptTab
+from pyanaconda.flags import flags
 
 from pyanaconda.anaconda_loggers import get_module_logger
 log = get_module_logger(__name__)
@@ -77,8 +78,15 @@ def find_existing_installations(devicetree, teardown_all=True):
     :return: roots of all found installations
     """
     try:
-        roots = _find_existing_installations(devicetree)
-        return roots
+        if flags.rescue_mode:
+            msg = "[Qubes OS]: Find existing installations is enabled."
+            log.warning(msg)
+            roots = _find_existing_installations(devicetree)
+            return roots
+        else:
+            msg = "[Qubes OS]: Find existing installations is disabled for" \
+                  "security reasons. Only allowed in rescue mode."
+            log.info(msg)
     except Exception:  # pylint: disable=broad-except
         log_exception_info(log.info, "failure detecting existing installations")
     finally:
