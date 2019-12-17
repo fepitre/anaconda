@@ -88,6 +88,11 @@ class StorageSection(Section):
         return self._get_option("default_partitioning", PartitioningType)
 
     @property
+    def encrypted_partitioning(self):
+        """Do you want to set encrypted partitioning?"""
+        return self._get_option("encrypted_partitioning", bool)
+
+    @property
     def luks_version(self):
         """Default version of LUKS.
 

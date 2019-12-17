@@ -617,7 +617,7 @@ class StorageSpoke(NormalSpoke, StorageCheckHandler):
             overview.set_chosen(name in self._selected_disks)
 
         # if encrypted is specified in kickstart, select the encryptionCheckbox in the GUI
-        if self._partitioning_request.encrypted:
+        if self._partitioning_request.encrypted or conf.storage.encrypted_partitioning:
             self._encrypted_checkbox.set_active(True)
 
         self._update_summary()
