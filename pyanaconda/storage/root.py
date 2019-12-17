@@ -76,14 +76,8 @@ def find_existing_installations(devicetree, teardown_all=True):
     :param bool teardown_all: whether to tear down all devices in the end
     :return: roots of all found installations
     """
-    try:
-        roots = _find_existing_installations(devicetree)
-        return roots
-    except Exception:  # pylint: disable=broad-except
-        log_exception_info(log.info, "failure detecting existing installations")
-    finally:
-        if teardown_all:
-            devicetree.teardown_all()
+    if teardown_all:
+        devicetree.teardown_all()
 
     return []
 
