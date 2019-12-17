@@ -79,7 +79,6 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
         self._password_label = self.builder.get_object("password_label")
         self._enable_root_radio = self.builder.get_object("enable_root_radio")
         self._disable_root_radio = self.builder.get_object("disable_root_radio")
-        self._root_password_ssh_login_override = self.builder.get_object("root_password_ssh_login_override")
         self._revealer = self.builder.get_object("password_revealer")
 
         # Install the password checks:
@@ -155,9 +154,6 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
         control.set_active(True)
         self.on_root_enabled_changed(control)
 
-        self._root_password_ssh_login_override.set_active(
-            self._users_module.RootPasswordSSHLoginAllowed
-        )
         if self.root_enabled:
             # rerun checks so that we have a correct status message, if any
             self.checker.run_checks()
@@ -172,7 +168,7 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
     @property
     def mandatory(self):
         """Only mandatory if no admin user has been requested."""
-        return False
+        return not self._users_module.CheckAdminUserExists()
 
     def apply(self):
         if self.root_enabled and self.password:
@@ -187,12 +183,6 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
 
             # Lock the root account.
             self._users_module.IsRootAccountLocked = True
-
-        if self.root_enabled:
-            # the checkbox makes it possible to override the default Open SSH
-            # policy of not allowing root to login with password
-            ssh_login_override = self._root_password_ssh_login_override.get_active()
-            self._users_module.RootPasswordSSHLoginAllowed = ssh_login_override
 
         # clear any placeholders
         self.remove_placeholder_texts()
