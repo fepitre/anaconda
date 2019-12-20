@@ -47,7 +47,7 @@ from pyanaconda.modules.common.structures.network import NetworkDeviceInfo
 from pyanaconda.anaconda_loggers import get_module_logger
 log = get_module_logger(__name__)
 
-DEFAULT_HOSTNAME = "localhost.localdomain"
+DEFAULT_HOSTNAME = "dom0"
 
 network_connected = None
 network_connected_condition = threading.Condition()
