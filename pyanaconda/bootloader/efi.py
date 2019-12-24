@@ -125,7 +125,7 @@ class EFIBase(object):
 
 class EFIGRUB(EFIBase, GRUB2):
     """EFI GRUBv2"""
-    _packages32 = [ "grub2-efi-ia32", "shim-ia32" ]
+    _packages32 = [ "grub2-efi-ia32" ]
     _packages_common = [ "efibootmgr", "grub2-tools" ]
     can_dual_boot = False
     stage2_is_valid_stage1 = False
@@ -135,7 +135,7 @@ class EFIGRUB(EFIBase, GRUB2):
 
     def __init__(self):
         super().__init__()
-        self._packages64 = [ "grub2-efi-x64", "shim-x64" ]
+        self._packages64 = [ "grub2-efi-x64" ]
 
         try:
             f = open("/sys/firmware/efi/fw_platform_size", "r")
@@ -150,8 +150,8 @@ class EFIGRUB(EFIBase, GRUB2):
     @property
     def _efi_binary(self):
         if self._is_32bit_firmware:
-            return "\\shimia32.efi"
-        return "\\shimx64.efi"
+            return "\\grubx32.efi"
+        return "\\grubx64.efi"
 
     @property
     def packages(self):
