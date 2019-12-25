@@ -771,6 +771,8 @@ class FSSet(object):
                     break
             if device.encrypted:
                 options += ",x-systemd.device-timeout=0"
+            if fstype in ('ext4', 'btrfs', 'xfs', 'vfat'):
+                options += ",discard"
             devspec = device.fstab_spec
             dump = device.format.dump
             if device.format.check and mountpoint == "/":
