@@ -385,7 +385,9 @@ class InstallerStorage(Blivet):
 
     def _get_container_name_template(self, prefix=None):
         """Return a template for suggest_container_name method."""
-        prefix = prefix or ""  # make sure prefix is a string instead of None
+        # Ensure 'qubes' prefix for R4.0 compatibility
+        # else it's set to 'qubesos' the product variable
+        prefix = "qubes"
 
         # try to create a device name incorporating the hostname
         hostname = self._get_hostname()
