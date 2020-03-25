@@ -369,15 +369,32 @@ def schedule_volumes(storage, devices, scheme, requests, encrypted=False):
     # Convert requests into Device instances and schedule them for creation.
     #
     # Second pass, for LVs only.
+
+    # TODO: Ensure requests are properly ordered:
+    #  VG -> Static LV
+    #  VG -> Thin Pool - > Thin Volume
+
+    # Any thin logical volume creation without previously any requested
+    # thin logical pool, a default one is then created.
+
+    # TODO: Ensure no new thin logical pool is requested after
+    #  default created thin logical volume is made.
     pool = None
     for request in requests:
         btr = bool(scheme == AUTOPART_TYPE_BTRFS and request.btr)
         lv = bool(scheme in (AUTOPART_TYPE_LVM, AUTOPART_TYPE_LVM_THINP) and request.lv)
         thinlv = bool(scheme == AUTOPART_TYPE_LVM_THINP and request.lv and request.thin_volume)
+        thinlp = bool(scheme == AUTOPART_TYPE_LVM_THINP and request.lv and request.thin_pool)
+
+        if thinlp:
+            pool = storage.new_lv(parents=[container], thin_pool=True,
+                                  size=request.size, grow=request.grow)
 
         if thinlv and pool is None:
             # create a single thin pool in the vg
             pool = storage.new_lv(parents=[container], thin_pool=True, grow=True)
+
+        if pool:
             storage.create_device(pool)
 
             # make sure VG reserves space for the pool to grow if needed
