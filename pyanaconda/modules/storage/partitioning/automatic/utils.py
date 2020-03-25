@@ -272,7 +272,7 @@ def get_default_partitioning():
             mountpoint=name if not swap else None,
             fstype=None if not swap else "swap",
             lv=True,
-            thin=not swap,
+            thin_volume=not swap,
             btr=not swap,
             size=attrs.get("min") or attrs.get("size"),
             max_size=attrs.get("max"),
@@ -480,7 +480,7 @@ def schedule_volumes(storage, devices, scheme, requests, encrypted=False):
     for request in requests:
         btr = bool(scheme == AUTOPART_TYPE_BTRFS and request.btr)
         lv = bool(scheme in (AUTOPART_TYPE_LVM, AUTOPART_TYPE_LVM_THINP) and request.lv)
-        thinlv = bool(scheme == AUTOPART_TYPE_LVM_THINP and request.lv and request.thin)
+        thinlv = bool(scheme == AUTOPART_TYPE_LVM_THINP and request.lv and request.thin_volume)
 
         if thinlv and pool is None:
             # create a single thin pool in the vg
