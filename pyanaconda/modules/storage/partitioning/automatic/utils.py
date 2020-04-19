@@ -373,12 +373,13 @@ def schedule_volumes(storage, devices, scheme, requests, encrypted=False):
     pool = None
     request_thin_pool = False
     request_thin_volume = False
-    for request in requests:
-        if request.thin_pool:
-            request_thin_pool = True
+    if scheme in (AUTOPART_TYPE_LVM, AUTOPART_TYPE_LVM_THINP):
+        for request in requests:
+            if request.thin_pool:
+                request_thin_pool = True
 
-        if request.thin_volume:
-            request_thin_volume = True
+            if request.thin_volume:
+                request_thin_volume = True
 
     if request_thin_volume and not request_thin_pool:
         # create only one default thin pool if no thin_pool is requested

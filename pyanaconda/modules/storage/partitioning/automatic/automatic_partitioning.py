@@ -30,6 +30,8 @@ from pyanaconda.modules.storage.partitioning.automatic.utils import get_candidat
 from pyanaconda.platform import platform
 from pyanaconda.storage.partspec import PartSpec
 from pyanaconda.storage.utils import suggest_swap_size, get_pbkdf_args
+from pykickstart.constants import AUTOPART_TYPE_BTRFS, AUTOPART_TYPE_LVM, \
+    AUTOPART_TYPE_LVM_THINP, AUTOPART_TYPE_PLAIN
 
 log = get_module_logger(__name__)
 
@@ -113,11 +115,30 @@ QUBESOS_PARTITIONING = [
     )
 ]
 
+QUBESOS_BTRFS_PARTITIONING = [
+    PartSpec(
+        fstype="swap",
+        grow=False,
+        lv=True,
+        encrypted=True
+    ),
+    PartSpec(
+        mountpoint="/",
+        size=Size("10GiB"),
+        required_space=Size("10GiB"),
+        grow=True,
+        btr=True,
+        lv=True,
+        thin_volume=True,
+        encrypted=True
+    )
+]
 
-def get_default_partitioning(partitioning_type=None):
+def get_default_partitioning(partitioning_type=None, scheme=None):
     """Get the default partitioning requests.
 
     :param partitioning_type: a type of the partitioning
+    :param scheme: a type of the partitioning scheme
     :return: a list of partitioning specs
     """
     if not partitioning_type:
@@ -130,7 +151,10 @@ def get_default_partitioning(partitioning_type=None):
         return platform.set_default_partitioning() + WORKSTATION_PARTITIONING
 
     if partitioning_type is PartitioningType.QUBESOS:
-        return platform.set_default_partitioning() + QUBESOS_PARTITIONING
+        if scheme == AUTOPART_TYPE_BTRFS:
+            return platform.set_default_partitioning() + QUBESOS_BTRFS_PARTITIONING
+        else:
+            return platform.set_default_partitioning() + QUBESOS_PARTITIONING
 
     raise ValueError("Invalid partitioning type: {}".format(conf.storage.default_partitioning))
 
@@ -188,7 +212,7 @@ class AutomaticPartitioningTask(NonInteractivePartitioningTask):
             luks_data.pbkdf_args = pbkdf_args
 
         # Get the autopart requests.
-        requests = self._get_partitioning(storage, self._request.excluded_mount_points)
+        requests = self._get_partitioning(storage, scheme, self._request.excluded_mount_points)
 
         # Do the autopart.
         self._do_autopart(storage, scheme, requests, encrypted, luks_format_args)
@@ -225,7 +249,7 @@ class AutomaticPartitioningTask(NonInteractivePartitioningTask):
         }
 
     @staticmethod
-    def _get_partitioning(storage, excluded_mount_points=()):
+    def _get_partitioning(storage, scheme, excluded_mount_points=()):
         """Get the partitioning requests for autopart.
 
         :param storage: blivet.Blivet instance
@@ -234,7 +258,7 @@ class AutomaticPartitioningTask(NonInteractivePartitioningTask):
         """
         requests = []
 
-        for request in get_default_partitioning():
+        for request in get_default_partitioning(scheme=scheme):
             # Skip excluded mount points.
             if (request.mountpoint or request.fstype) in excluded_mount_points:
                 continue
