@@ -807,6 +807,19 @@ class DNFPayload(payload.PackagePayload):
             langpacks.append("langpacks-" + loc)
         return langpacks
 
+    @property
+    def qubes_templates_size(self):
+        # get all available Qubes templates in repos
+        available_templates = self._base.sack.query().available() \
+            .filter(name__glob="qubes-template-*")
+        templates_size = Size()
+        for template in available_templates:
+            templates_size += Size(template.downloadsize)
+            log.debug("[Qubes OS]: Size of %s: %s", (template.name, template.downloadsize))
+
+        log.debug("[Qubes OS]: Total templates RPMs size: %s", templates_size)
+        return templates_size
+
     def _sync_metadata(self, dnf_repo):
         try:
             dnf_repo.load()
