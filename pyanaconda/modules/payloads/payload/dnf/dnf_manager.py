@@ -1045,3 +1045,15 @@ class DNFManager(object):
                 continue
 
         return ""
+
+    def get_qubes_templates_size(self):
+        # get all available Qubes templates in repos
+        available_templates = self._base.sack.query().available() \
+            .filter(name__glob="qubes-template-*")
+        templates_size = 0
+        for template in available_templates:
+            templates_size += template.downloadsize
+            log.debug("[Qubes OS]: Size of %s: %s", (template.name, template.downloadsize))
+
+        log.debug("[Qubes OS]: Total templates RPMs size: %s", templates_size)
+        return templates_size

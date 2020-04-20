@@ -313,6 +313,12 @@ class DNFPayload(MigratedDBusPayload):
         return True
 
     @property
+    def qubes_templates_size(self):
+        """Return all templates size via dbus proxy"""
+        from blivet.size import Size
+        return Size(self.proxy.QubesTemplatesSize)
+
+    @property
     def software_validation_required(self):
         """Is it necessary to validate the software selection?"""
         return self._software_validation_required

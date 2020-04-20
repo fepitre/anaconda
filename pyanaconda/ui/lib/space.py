@@ -56,6 +56,10 @@ class FileSystemSpaceChecker(object):
         """Calculate the needed space."""
         return self.payload.space_required
 
+    def _calculate_needed_space_templates(self):
+        """Calculate the needed space for Qubes templates RPM."""
+        return self.payload.qubes_templates_size
+
     def _calculate_deficit(self, needed):
         """Calculate the deficit.
 
@@ -89,7 +93,8 @@ class FileSystemSpaceChecker(object):
                             in the info bar at the bottom of a Hub.
         """
         free = self._calculate_free_space()
-        needed = self._calculate_needed_space()
+        qubes = self._calculate_needed_space_templates()
+        needed = self._calculate_needed_space() + qubes
         log.info("fs space: %s  needed: %s", free, needed)
 
         if free > needed:

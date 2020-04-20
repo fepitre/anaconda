@@ -125,6 +125,10 @@ class DNFInterface(PayloadBaseInterface):
         """
         return self.implementation.packages_kickstarted
 
+    @property
+    def QubesTemplatesSize(self) -> UInt64:
+        return self.implementation._dnf_manager.get_qubes_templates_size()
+
     def GetAvailableRepositories(self) -> List[Str]:
         """Get a list of available repositories.
 
