@@ -409,6 +409,10 @@ class DNFPayload(payload.PackagePayload):
         if not ksrepo.enabled:
             self.disable_repo(repo.id)
 
+        repo_file = '/tmp/installer.repo'
+        with open(repo_file, 'a') as repo_fd:
+            repo_fd.write(repo.dump())
+
         log.info("added repo: '%s' - %s", ksrepo.name, url or mirrorlist or metalink)
 
     def _fetch_md(self, repo_name):
