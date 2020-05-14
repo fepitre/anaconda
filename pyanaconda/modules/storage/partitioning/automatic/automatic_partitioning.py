@@ -95,6 +95,7 @@ QUBESOS_PARTITIONING = [
         grow=False,
         lv=True,
         thin_pool=True,
+        pool_name="root-pool",
         encrypted=True
     ),
     PartSpec(
@@ -111,6 +112,7 @@ QUBESOS_PARTITIONING = [
         grow=True,
         lv=True,
         thin_pool=True,
+        pool_name="vm-pool",
         encrypted=True
     )
 ]

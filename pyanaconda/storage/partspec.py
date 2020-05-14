@@ -25,7 +25,7 @@ from blivet.util import stringize, unicodeize
 class PartSpec(object):
 
     def __init__(self, mountpoint=None, fstype=None, size=None, max_size=None,
-                 grow=False, btr=False, lv=False, thin_pool=False,
+                 grow=False, btr=False, lv=False, thin_pool=False, pool_name=None,
                  thin_volume=False, weight=0, required_space=0,
                  encrypted=False):
         """ Create a new storage specification.  These are used to specify
@@ -67,6 +67,7 @@ class PartSpec(object):
         self.lv = lv
         self.btr = btr
         self.thin_pool = thin_pool
+        self.pool_name = pool_name
         self.thin_volume = thin_volume
         self.weight = weight
         self.required_space = required_space
@@ -84,7 +85,7 @@ class PartSpec(object):
               "weight": self.weight, "fstype": self.fstype, "size": self.size,
               "enc": self.encrypted, "max_size": self.max_size,
               "grow": self.grow, "thin_volume": self.thin_volume,
-              "thin_pool": self.thin_pool})
+              "thin_pool": self.thin_pool, "pool_name": self.pool_name})
 
         return s
 

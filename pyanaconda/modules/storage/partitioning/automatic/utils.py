@@ -432,7 +432,8 @@ def schedule_volumes(storage, devices, scheme, requests, encrypted=False):
                 "maxsize": request.max_size,
                 "size": request.size,
                 "thin_pool": thinlp,
-                "thin_volume": thinlv
+                "thin_volume": thinlv,
+                "name": request.pool_name
             })
         else:
             kwargs.update({
