@@ -36,7 +36,7 @@ def get_kernel_version_list(root_path):
     files.extend(glob.glob(root_path + "/boot/efi/EFI/{}/vmlinuz-*".format(efi_dir)))
 
     kernel_version_list = [
-        f.split("/")[-1][8:] for f in files
+        f.split("/")[-1][8:] for f in set(files)
         if os.path.isfile(f) and "-rescue-" not in f
     ]
 
