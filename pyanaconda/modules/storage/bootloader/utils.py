@@ -235,7 +235,7 @@ def create_bls_entries(sysroot, storage, kernel_versions):
 
 
 def recreate_initrds(sysroot, kernel_versions):
-    """Recreate the initrds by calling new-kernel-pkg or dracut.
+    """Recreate the initrds by calling kernel-install or dracut
 
     This needs to be done after all configuration files have been
     written, since dracut depends on some of them.
@@ -243,40 +243,10 @@ def recreate_initrds(sysroot, kernel_versions):
     :param sysroot: a path to the root of the installed system
     :param kernel_versions: a list of kernel versions
     """
-    if os.path.exists(sysroot + "/usr/sbin/new-kernel-pkg"):
-        use_dracut = False
-    else:
-        log.debug("new-kernel-pkg does not exist, using dracut instead")
-        use_dracut = True
-
     for kernel in kernel_versions:
         log.info("Recreating initrd for %s", kernel)
-
-        if conf.target.is_image:
-            # Dracut runs in the host-only mode by default, so we need to
-            # turn it off by passing the -N option, because the mode is not
-            # sensible for disk image installations. Using /dev/disk/by-uuid/
-            # is necessary due to disk image naming.
-            execWithRedirect(
-                "dracut", [
-                    "-N", "--persistent-policy", "by-uuid",
-                    "-f", "/boot/initramfs-%s.img" % kernel, kernel
-                ],
-                root=sysroot
-            )
-        else:
-            if use_dracut:
-                execWithRedirect(
-                    "depmod", ["-a", kernel], root=sysroot
-                )
-                execWithRedirect(
-                    "dracut",
-                    ["-f", "/boot/initramfs-%s.img" % kernel, kernel],
-                    root=sysroot
-                )
-            else:
-                execWithRedirect(
-                    "new-kernel-pkg",
-                    ["--mkinitrd", "--dracut", "--depmod", "--update", kernel],
-                    root=sysroot
-                )
+        execWithRedirect(
+            "kernel-install",
+            ["add", kernel, "/boot/vmlinuz-%s" % kernel],
+            root=sysroot
+        )
