@@ -12,7 +12,7 @@ jobs:
     runs-on: [self-hosted, ci-tasks, rhel-8]
     steps:
       - name: Checkout copr-builder repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
         with:
           repository: vojtechtrefny/copr-builder
 
