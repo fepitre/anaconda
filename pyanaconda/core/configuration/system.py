@@ -66,7 +66,7 @@ class SystemSection(Section):
     @property
     def can_reboot(self):
         """Can we reboot the system?"""
-        return self._is_boot_iso or self._is_booted_os
+        return False
 
     @property
     def can_start_user_systemd(self):

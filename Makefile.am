@@ -252,6 +252,17 @@ rpms: srpm
 	rpmbuild --rebuild --define "_rpmdir $(RPM_BUILD_DIR)" $(SRPM_BUILD_DIR)/anaconda-*.src.rpm
 	mv "$(RPM_BUILD_DIR)"/*/*.rpm "$(RPM_BUILD_DIR)" # move rpms from per-architecture subdirectory
 
+anaconda-gui:
+	sudo ANACONDA_DATA=$(srcdir)/data \
+	ANACONDA_WIDGETS_OVERRIDES=$(srcdir)/widgets/python \
+	PYTHONPATH=$(srcdir):$(builddir)/pyanaconda/isys/.libs:$(srcdir)/widgets/python/:$(builddir)/widgets/src/.libs/ \
+	LD_LIBRARY_PATH=$(builddir)/widgets/src/.libs \
+	UIPATH=$(srcdir)/pyanaconda/ui/gui/ \
+	GI_TYPELIB_PATH=$(builddir)/widgets/src/ \
+	GLADE_CATALOG_SEARCH_PATH=$(srcdir)/widgets/glade \
+	GLADE_MODULE_SEARCH_PATH=$(builddir)/widgets/src/.libs \
+	python3 anaconda.py -G --profile qubesos
+
 # GUI TESTING
 runglade:
 	ANACONDA_DATA=$(srcdir)/data \
