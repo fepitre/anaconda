@@ -33,7 +33,7 @@ class PartitioningRequest(DBusData):
         self._file_system_type = ""
         self._excluded_mount_points = []
 
-        self._encrypted = False
+        self._encrypted = conf.storage.encrypted
         self._passphrase = ""
         self._cipher = ""
         self._luks_version = ""
