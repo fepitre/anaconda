@@ -51,6 +51,10 @@ class StorageSection(Section):
     """The Storage section."""
 
     @property
+    def encrypted(self):
+        """Is encryption set?"""
+        return self._get_option("encrypted", bool)
+
     def ibft(self):
         """Enable iBFT usage during the installation."""
         return self._get_option("ibft", bool)
