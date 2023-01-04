@@ -132,7 +132,7 @@ class AutomaticPartitioningTask(NonInteractivePartitioningTask):
         """
         requests = []
 
-        for request in get_default_partitioning():
+        for request in get_default_partitioning(scheme):
             # Skip mount points excluded from the chosen scheme.
             if request.schemes and scheme not in request.schemes:
                 continue
