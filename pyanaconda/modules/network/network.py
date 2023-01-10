@@ -74,16 +74,20 @@ class NetworkService(KickstartService):
         self.capabilities_changed = Signal()
 
         self.connected_changed = Signal()
-        # TODO fallback solution - use Gio/GNetworkMonitor ?
-        self.nm_client = get_new_nm_client()
-        if self.nm_client:
-            self.nm_client.connect("notify::%s" % NM.CLIENT_STATE, self._nm_state_changed)
-            initial_state = self.nm_client.get_state()
-            self.set_connected(self._nm_state_connected(initial_state))
-            self.nm_client.connect("notify::%s" % NM.CLIENT_CAPABILITIES,
-                                   self._nm_capabilities_changed)
-            nm_capabilities = self.nm_client.get_capabilities()
-            self.set_capabilities(self._get_capabilities_from_nm(nm_capabilities))
+        self.nm_client = None
+        if not conf.network.skip_enable:
+            # TODO fallback solution - use Gio/GNetworkMonitor ?
+            self.nm_client = get_new_nm_client()
+            if self.nm_client:
+                self.nm_client.connect("notify::%s" % NM.CLIENT_STATE, self._nm_state_changed)
+                initial_state = self.nm_client.get_state()
+                self.set_connected(self._nm_state_connected(initial_state))
+                self.nm_client.connect("notify::%s" % NM.CLIENT_CAPABILITIES,
+                                       self._nm_capabilities_changed)
+                nm_capabilities = self.nm_client.get_capabilities()
+                self.set_capabilities(self._get_capabilities_from_nm(nm_capabilities))
+        else:
+            log.debug("Enabling network is skipped.")
 
         self._original_network_data = []
         self._device_configurations = None

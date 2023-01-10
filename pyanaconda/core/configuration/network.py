@@ -50,3 +50,8 @@ class NetworkSection(Section):
     def hostname(self):
         """Hostname"""
         return self._get_option("hostname", str)
+
+    @property
+    def skip_enable(self):
+        """Should we skip enabling network?"""
+        return self._get_option("skip_enable", bool)
