@@ -290,8 +290,6 @@ class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
         # check boxes
         self._admin_checkbox = self.builder.get_object("admin_checkbox")
         self._password_required_checkbox = self.builder.get_object("password_required_checkbox")
-        # advanced user configration dialog button
-        self._advanced_button = self.builder.get_object("advanced_button")
         # password checking status bar & label
         self._password_bar = self.builder.get_object("password_bar")
         self._password_label = self.builder.get_object("password_label")
@@ -365,19 +363,8 @@ class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
         # the Gtk signal handlers use the input check variables.
         password_set_message = _("The password was set by kickstart.")
         if self.password_kickstarted:
-            self.password_required = True
             self.password_entry.set_placeholder_text(password_set_message)
             self.password_confirmation_entry.set_placeholder_text(password_set_message)
-        elif not self.checker.policy.allow_empty:
-            # Policy is that a non-empty password is required
-            self.password_required = True
-
-        if not self.checker.policy.allow_empty:
-            # User isn't allowed to change whether password is required or not
-            self.password_required_checkbox.set_sensitive(False)
-
-        self._advanced_user_dialog = AdvancedUserDialog(self)
-        self._advanced_user_dialog.initialize()
 
         # report that we are done
         self.initialize_done()
@@ -412,11 +399,7 @@ class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
 
     @property
     def password_required(self):
-        return self.password_required_checkbox.get_active()
-
-    @password_required.setter
-    def password_required(self, value):
-        self.password_required_checkbox.set_active(value)
+        return True
 
     @property
     def user(self):
@@ -440,7 +423,6 @@ class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
 
         self.username = self.user.name
         self.fullname = self.user.gecos
-        self._admin_checkbox.set_active(self.user.has_admin_priviledges())
 
         # rerun checks so that we have a correct status message, if any
         self.checker.run_checks()
@@ -555,12 +537,6 @@ class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
         """Called by Gtk on all username changes."""
         new_username = editable.get_text()
 
-        # Disable the advanced user dialog button when no username is set
-        if editable.get_text():
-            self._advanced_button.set_sensitive(True)
-        else:
-            self._advanced_button.set_sensitive(False)
-
         # update the username in checker
         self.checker.username = new_username
 
@@ -585,23 +561,6 @@ class UserSpoke(NormalSpoke, GUISpokeInputCheckHandler):
 
         # rerun the checks
         self.checker.run_checks()
-
-    def on_admin_toggled(self, togglebutton, data=None):
-        # Add or remove user admin status based on changes to the admin checkbox
-        self.user.set_admin_priviledges(togglebutton.get_active())
-
-    def on_advanced_clicked(self, _button, data=None):
-        """Handler for the Advanced.. button. It starts the Advanced dialog
-        for setting homedir, uid, gid and groups.
-        """
-
-        self.user.name = self.username
-
-        self._advanced_user_dialog.refresh()
-        with self.main_window.enlightbox(self._advanced_user_dialog.window):
-            self._advanced_user_dialog.run()
-
-        self._admin_checkbox.set_active(self.user.has_admin_priviledges())
 
     def _checks_done(self, error_message):
         """Update the warning with the input validation error from the first

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.1 -->
+<!-- Generated with glade 3.40.0 -->
 <interface>
   <requires lib="gtk+" version="3.6"/>
   <requires lib="AnacondaWidgets" version="1.0"/>
@@ -203,23 +203,6 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="password_required_checkbox">
-                        <property name="label" translatable="yes" context="GUI|User">_Require a password to use this account</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">False</property>
-                        <property name="use-underline">True</property>
-                        <property name="xalign">0</property>
-                        <property name="active">True</property>
-                        <property name="draw-indicator">True</property>
-                        <signal name="toggled" handler="on_password_required_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
                       <object class="GtkBox" id="box2">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -262,42 +245,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="admin_checkbox">
-                        <property name="label" translatable="yes" context="GUI|User">Add ad_ministrative privileges to this user account (wheel group membership)</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">False</property>
-                        <property name="active">True</property>
-                        <property name="tooltip-text" translatable="yes" context="GUI|User">Allow this user to run the 'sudo' command.</property>
-                        <property name="use-underline">True</property>
-                        <property name="xalign">0</property>
-                        <property name="draw-indicator">True</property>
-                        <signal name="toggled" handler="on_admin_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
                       <!-- n-columns=3 n-rows=3 -->
                       <object class="GtkGrid" id="grid2">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <child>
-                          <object class="GtkButton" id="advanced_button">
-                            <property name="label" translatable="yes" context="GUI|User">_Advanced...</property>
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="use-underline">True</property>
-                            <signal name="clicked" handler="on_advanced_clicked" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">0</property>
-                          </packing>
+                          <placeholder/>
                         </child>
                         <child>
                           <placeholder/>
@@ -328,6 +281,12 @@
                         <property name="left-attach">1</property>
                         <property name="top-attach">8</property>
                       </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                     <child>
                       <placeholder/>
