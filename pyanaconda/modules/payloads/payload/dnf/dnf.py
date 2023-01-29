@@ -464,6 +464,7 @@ class DNFModule(PayloadBase):
                 sysroot=conf.target.system_root,
                 dnf_manager=self.dnf_manager,
                 repositories=self.repositories,
+                sources=self.sources,
             ),
             ImportRPMKeysTask(
                 sysroot=conf.target.system_root,

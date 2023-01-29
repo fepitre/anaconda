@@ -252,7 +252,7 @@ class InstallPackagesTask(Task):
 class WriteRepositoriesTask(Task):
     """The installation task for writing repositories on the target system."""
 
-    def __init__(self, sysroot, dnf_manager, repositories):
+    def __init__(self, sysroot, dnf_manager, repositories, sources):
         """Create a new task.
 
         :param str sysroot: a path to the system root
@@ -263,6 +263,7 @@ class WriteRepositoriesTask(Task):
         self._sysroot = sysroot
         self._dnf_manager = dnf_manager
         self._repositories = repositories
+        self._sources = sources
 
     @property
     def name(self):
@@ -278,6 +279,16 @@ class WriteRepositoriesTask(Task):
             log.info("Writing %s.repo to the target system.", repo.name)
             content = self._dnf_manager.generate_repo_file(repo)
             self._write_repo_file(repo.name, content)
+
+        for source in self._sources:
+            repo = source.repository
+            if not repo.name:
+                repo.name = "default"
+            log.info("Writing %s.repo to the installer.repo.", repo.name)
+            content = self._dnf_manager.generate_repo_file(repo)
+            make_directories("/tmp/installer.repos.d")
+            with open(f"/tmp/installer.repos.d/{repo.name}.repo", "w") as f:
+                f.write(content.strip() + "\n")
 
     def _can_write_repo(self, repo):
         """Can we write the specified repository to the target system?
