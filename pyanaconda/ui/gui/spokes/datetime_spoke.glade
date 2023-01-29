@@ -19,11 +19,6 @@
     <property name="inline-completion">True</property>
     <signal name="match-selected" handler="on_completion_match_selected" object="cityCombobox" swapped="no"/>
   </object>
-  <object class="GtkImage" id="configImage">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">system-run-symbolic</property>
-  </object>
   <object class="GtkListStore" id="days">
     <columns>
       <!-- column-name idx -->
@@ -255,105 +250,6 @@
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="ntpRadioButton">
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">False</property>
-                        <property name="margin-start">4</property>
-                        <property name="margin-bottom">12</property>
-                        <property name="draw-indicator">True</property>
-                        <signal name="toggled" handler="on_ntp_button_toggled" swapped="no"/>
-                        <child>
-                          <object class="GtkAccelLabel" id="ntpLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes" context="GUI|Date and Time">_Automatic date &amp; time</property>
-                            <property name="use-underline">True</property>
-                            <property name="accel-widget">ntpRadioButton</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"/>
-                            </attributes>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="ntpDescriptionLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="margin-start">28</property>
-                        <property name="margin-bottom">12</property>
-                        <property name="label" translatable="yes">This feature requires connecting to an NTP (Network Time Protocol) server.</property>
-                        <property name="wrap">True</property>
-                        <property name="max-width-chars">60</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="ntpConfigButton">
-                        <property name="label" translatable="yes" context="GUI|Date and Time">Configure _NTP ...</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
-                        <property name="halign">start</property>
-                        <property name="margin-start">28</property>
-                        <property name="margin-bottom">24</property>
-                        <property name="image">configImage</property>
-                        <property name="use-underline">True</property>
-                        <property name="always-show-image">True</property>
-                        <signal name="clicked" handler="on_ntp_config_clicked" swapped="no"/>
-                        <child internal-child="accessible">
-                          <object class="AtkObject" id="ntpConfigButton-atkobject">
-                            <property name="AtkObject::accessible-name" translatable="yes">Configure NTP</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="padding">1</property>
-                        <property name="position">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="manualRadioButton">
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">False</property>
-                        <property name="margin-start">4</property>
-                        <property name="margin-bottom">12</property>
-                        <property name="draw-indicator">True</property>
-                        <property name="group">ntpRadioButton</property>
-                        <child>
-                          <object class="GtkAccelLabel" id="manualLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes" context="GUI|Date and Time">_Manual date &amp; time</property>
-                            <property name="use-underline">True</property>
-                            <property name="accel-widget">manualRadioButton</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"/>
-                            </attributes>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">5</property>
                       </packing>
                     </child>
                     <child>

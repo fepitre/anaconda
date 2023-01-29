@@ -258,9 +258,9 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
         self._year_format, suffix = formats[widgets.index(year_box)]
         year_label.set_text(suffix)
 
-        self._ntp_radio_button = self.builder.get_object("ntpRadioButton")
-        self._ntp_config_button = self.builder.get_object("ntpConfigButton")
-        self._manual_radio_button = self.builder.get_object("manualRadioButton")
+        self._ntp_radio_button = None
+        self._ntp_config_button = None
+        self._manual_radio_button = None
 
         self._regions_zones = get_all_regions_and_timezones()
 
@@ -339,7 +339,7 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
             region + "/" + city,
             constants.TIMEZONE_PRIORITY_USER
         )
-        self._timezone_module.NTPEnabled = self._ntp_radio_button.get_active()
+        self._timezone_module.NTPEnabled = False
         self._kickstarted = False
 
     def execute(self):
@@ -375,28 +375,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
         timezone = self._get_valid_timezone(self._timezone_module.Timezone)
         self._set_region_and_city_from_timezone(timezone)
         self._set_timezone(timezone)
-
-        # update the ntp configuration
-        self._ntp_servers = TimeSourceData.from_structure_list(
-            self._timezone_module.TimeSources
-        )
-
-        # Set up the NTP servers.
-        if not self._ntp_servers:
-            try:
-                self._ntp_servers = ntp.get_servers_from_config()
-            except ntp.NTPconfigError:
-                log.warning("Failed to load NTP servers configuration")
-
-        self._ntp_servers_states = NTPServerStatusCache()
-        self._ntp_servers_states.changed.connect(self._update_ntp_server_warning)
-
-        if self._network_module.Connected:
-            for server in self._ntp_servers:
-                self._ntp_servers_states.check_status(server)
-
-        # Set up the NTP widgets.
-        self._set_ntp_enabled(self._timezone_module.NTPEnabled)
 
     @async_action_nowait
     def add_to_store_xlated(self, store, item, xlated):
@@ -848,31 +826,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
             self._update_datetime_timer = Timer()
             self._update_datetime_timer.timeout_sec(1, self._update_datetime)
 
-    def on_ntp_button_toggled(self, button):
-        """Toggle the NTP configuration."""
-        log.debug("Toggled the NTP configuration.")
-        self._set_ntp_enabled(self._ntp_radio_button.get_active())
-
-    def _set_ntp_enabled(self, ntp_requested):
-        """Set the NTP enabled configuration."""
-        # Clear warnings.
-        self.clear_info()
-
-        # Try to configure the NTP service.
-        ntp_enabled = self._start_ntp_service() if ntp_requested else self._stop_ntp_service()
-
-        # Update the widgets.
-        with blocked_handler(self._ntp_radio_button, self.on_ntp_button_toggled):
-            self._ntp_radio_button.set_active(ntp_enabled)
-            self._ntp_config_button.set_sensitive(ntp_enabled)
-
-            self._manual_radio_button.set_active(not ntp_enabled)
-            self._set_date_time_setting_sensitive(not ntp_enabled)
-
-        # Update the timers.
-        if ntp_enabled:
-            self._cancel_planned_update()
-
     def _start_ntp_service(self):
         """Start the NTP service.
 
@@ -952,7 +905,7 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
 
     def _update_ntp_server_warning(self):
         """Update the warning about working NTP servers."""
-        if not self._ntp_radio_button.get_active():
+        if not False:
             return
 
         self.clear_info()
