@@ -265,7 +265,7 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
         self._year_format, suffix = formats[widgets.index(year_box)]
         year_label.set_text(suffix)
 
-        self._ntpSwitch = self.builder.get_object("networkTimeSwitch")
+        self._ntpSwitch = None
 
         self._regions_zones = get_all_regions_and_timezones()
 
@@ -353,7 +353,7 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
             return
 
         self._timezone_module.Timezone = region + "/" + city
-        self._timezone_module.NTPEnabled = self._ntpSwitch.get_active()
+        self._timezone_module.NTPEnabled = False
         self._kickstarted = False
 
     def execute(self):
@@ -392,37 +392,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
             time.tzset()
 
         self._update_datetime()
-
-        # update the ntp configuration
-        self._ntp_servers = TimeSourceData.from_structure_list(
-            self._timezone_module.TimeSources
-        )
-
-        if not self._ntp_servers:
-            try:
-                self._ntp_servers = ntp.get_servers_from_config()
-            except ntp.NTPconfigError:
-                log.warning("Failed to load NTP servers configuration")
-
-        self._ntp_servers_states = NTPServerStatusCache()
-        self._ntp_servers_states.changed.connect(self._update_ntp_server_warning)
-
-        has_active_network = self._network_module.Connected
-
-        if not has_active_network:
-            self._show_no_network_warning()
-        else:
-            self.clear_info()
-
-            for server in self._ntp_servers:
-                self._ntp_servers_states.check_status(server)
-
-        if conf.system.can_set_time_synchronization:
-            ntp_working = has_active_network and is_service_running(NTP_SERVICE)
-        else:
-            ntp_working = self._timezone_module.NTPEnabled
-
-        self._ntpSwitch.set_active(ntp_working)
 
     @async_action_wait
     def _set_timezone(self, timezone):
