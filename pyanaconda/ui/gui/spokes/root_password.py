@@ -168,7 +168,7 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
     @property
     def mandatory(self):
         """Only mandatory if no admin user has been requested."""
-        return not self._users_module.CheckAdminUserExists()
+        return False
 
     def apply(self):
         if self.root_enabled and self.password:
