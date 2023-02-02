@@ -446,6 +446,13 @@ class DNFPayload(Payload):
         log.debug("[Qubes OS]: Total templates RPMs size: %s", templates_size)
         return templates_size
 
+    def pre_install(self):
+        super().pre_install()
+        for repo in self._dnf_manager._base.iter_enabled():
+            repo_file = '/tmp/installer.repo'
+            with open(repo_file, 'a') as repo_fd:
+                repo_fd.write(repo.dump())
+
     def install(self):
         self._progress_cb(0, _('Starting package installation process'))
 
