@@ -20,6 +20,7 @@
 __all__ = ["UserInterface"]
 
 import copy
+from pyanaconda.core.configuration.anaconda import conf
 from pyanaconda.core.util import collect
 
 
@@ -154,6 +155,7 @@ class UserInterface(object):
 
         def check_standalone_spokes(obj):
             return issubclass(obj, standalone_class) and \
+                obj.__name__ not in conf.ui.hidden_spokes and \
                 getattr(obj, "preForHub", False) or \
                 getattr(obj, "postForHub", False)
 
