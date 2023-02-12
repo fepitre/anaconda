@@ -115,7 +115,7 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
         self._accordion = None
 
         self._partitioning_scheme = conf.storage.default_scheme
-        self._partitioning_encrypted = False
+        self._partitioning_encrypted = conf.storage.encrypted
 
         self._default_file_system = ""
         self._selected_disks = []

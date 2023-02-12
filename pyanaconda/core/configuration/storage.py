@@ -178,6 +178,7 @@ class StorageSection(Section):
             min        The size will grow from min size to max size.
             max        The max size is unlimited by default.
             free       The required available space.
+            fstype     Force specific file system.
             btrfs      The mount point will be created only for the Btrfs scheme
 
         :return: a list of dictionaries with mount point attributes
@@ -217,6 +218,9 @@ class StorageSection(Section):
             if not value and name in ("btrfs", ):
                 # Handle a boolean attribute.
                 attrs[name] = True
+            elif value and name in ("fstype", ):
+                # str.
+                attrs[name] = value
             elif value and name in ("size", "min", "max", "free"):
                 # Handle a size attribute.
                 attrs[name] = Size(value)
@@ -243,3 +247,10 @@ class StorageSection(Section):
 
         if attrs.get("max") and not attrs.get("min"):
             raise ValueError("The attribute 'max' cannot be set without 'min'.")
+
+        # HACK: hardcode fs types here, didn't find a nice method to get just
+        # filesystem types from blivet, without other formats
+        if "fstype" in attrs and attrs.get("fstype") not in (
+                "ext2", "ext3", "ext4", "xfs", "vfat", "efi", "btrfs", "gfs2",
+                "jfs", "reiserfs", "hfs", "appleboot", "hfs+", "macefi", "ntfs"):
+            raise ValueError("Unsupported 'fstype' value")

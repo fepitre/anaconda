@@ -289,7 +289,7 @@ def get_part_spec(attrs):
 
     spec = PartSpec(
         mountpoint=name if not swap else None,
-        fstype=None if not swap else "swap",
+        fstype=attrs.get("fstype") if not swap else "swap",
         lv=True,
         thin=not swap,
         btr=not swap,

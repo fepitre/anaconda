@@ -581,6 +581,11 @@ class AnacondaConfigurationTestCase(unittest.TestCase):
             "name": "swap"
         }
 
+        assert convert_line("/home (fstype xfs)") == {
+            "name": "/home",
+            "fstype": "xfs",
+        }
+
         with pytest.raises(ValueError):
             convert_line("")
 
@@ -598,6 +603,12 @@ class AnacondaConfigurationTestCase(unittest.TestCase):
 
         with pytest.raises(ValueError):
             convert_line("/home  (max 2 GiB)")
+
+        with pytest.raises(ValueError):
+            convert_line("/home  (fstype invalid)")
+
+        with pytest.raises(ValueError):
+            convert_line("/home  (fstype)")
 
     def test_default_installation_source(self):
         conf = AnacondaConfiguration.from_defaults()

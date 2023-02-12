@@ -288,6 +288,24 @@ class AutomaticPartitioningTaskTestCase(unittest.TestCase):
         assert [Size("1GiB"), Size("1GiB"), Size("500MiB")] == \
             [spec.size for spec in requests]
 
+        with patch('pyanaconda.core.configuration.storage.StorageSection.get_default_partitioning') as get_default_partitioning:
+            get_default_partitioning.return_value = [
+                {"name": "/", "size": Size("1GiB")},
+                {"name": "/home", "size": Size("1GiB"), "fstype": "xfs"}
+            ]
+            partitioning_request = PartitioningRequest()
+            partitioning_request._excluded_mount_points = ["/boot"]
+            requests = AutomaticPartitioningTask._get_partitioning(
+                storage=storage,
+                scheme=AUTOPART_TYPE_LVM,
+                request=partitioning_request
+            )
+            assert ["/", "/home"] == \
+                [spec.mountpoint for spec in requests]
+            assert ["ext4", "xfs"] == \
+                [spec.fstype for spec in requests]
+
+
     @patch('pyanaconda.modules.storage.partitioning.automatic.utils.platform')
     @patch('pyanaconda.modules.storage.partitioning.automatic.utils.conf')
     @patch('pyanaconda.modules.storage.partitioning.automatic.automatic_partitioning.suggest_swap_size')
@@ -334,7 +352,7 @@ class AutomaticPartitioningTaskTestCase(unittest.TestCase):
         assert not any(spec for spec in requests if spec.fstype == "swap")
 
         # Test Case: Swap, hibernation
-        mocked_config.storage.default_partitioning = [
+        mocked_config.storage.get_default_partitioning.return_value = [
             {
                 'name': '/',
                 'size': Size("50 GiB"),
@@ -377,7 +395,7 @@ class AutomaticPartitioningTaskTestCase(unittest.TestCase):
         platform.partitions = []
 
         # Set the default partitioning.
-        mocked_conf.storage.default_partitioning = [
+        mocked_conf.storage.get_default_partitioning.return_value = [
             {
                 'name': '/',
                 'size': Size("50 GiB"),
