@@ -17,6 +17,7 @@
 #
 from blivet.partitioning import do_partitioning, grow_lvm
 from blivet.static_data import luks_data
+from pykickstart.constants import AUTOPART_TYPE_LVM_THINP
 
 from pyanaconda.anaconda_loggers import get_module_logger
 from pyanaconda.modules.common.structures.partitioning import PartitioningRequest
@@ -119,6 +120,9 @@ class AutomaticPartitioningTask(NonInteractivePartitioningTask):
             "pbkdf_args": pbkdf_args,
             "escrow_cert": escrow_cert,
             "add_backup_passphrase": request.backup_passphrase_enabled,
+            "luks_sector_size": (
+                512 if request.partitioning_scheme == AUTOPART_TYPE_LVM_THINP else 0
+            ),
         }
 
     @staticmethod

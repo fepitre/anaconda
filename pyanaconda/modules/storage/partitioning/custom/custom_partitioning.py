@@ -410,7 +410,8 @@ class CustomPartitioningTask(NonInteractivePartitioningTask):
                     escrow_cert=cert,
                     add_backup_passphrase=partition_data.backuppassphrase,
                     luks_version=partition_data.luks_version,
-                    pbkdf_args=pbkdf_args
+                    pbkdf_args=pbkdf_args,
+                    luks_sector_size=(512 if ty == "lvmpv" else 0),
                 )
                 luksdev = LUKSDevice(
                     "luks%d" % storage.next_id,
@@ -426,7 +427,8 @@ class CustomPartitioningTask(NonInteractivePartitioningTask):
                     escrow_cert=cert,
                     add_backup_passphrase=partition_data.backuppassphrase,
                     luks_version=partition_data.luks_version,
-                    pbkdf_args=pbkdf_args
+                    pbkdf_args=pbkdf_args,
+                    luks_sector_size=(512 if ty == "lvmpv" else 0),
                 )
                 luksdev = LUKSDevice("luks%d" % storage.next_id,
                                      fmt=luksformat,
