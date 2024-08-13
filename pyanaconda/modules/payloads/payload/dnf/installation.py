@@ -31,7 +31,7 @@ from pyanaconda.modules.common.structures.packages import PackagesConfigurationD
 from pyanaconda.modules.common.task import Task
 from pyanaconda.modules.payloads.payload.dnf.requirements import collect_remote_requirements, \
     collect_language_requirements, collect_platform_requirements, \
-    collect_driver_disk_requirements, apply_requirements
+    collect_driver_disk_requirements, collect_kernel_requirements, apply_requirements
 from pyanaconda.modules.payloads.payload.dnf.utils import pick_download_location, \
     get_kernel_version_list
 from pyanaconda.modules.payloads.payload.dnf.validation import CheckPackagesSelectionTask
@@ -132,6 +132,7 @@ class ResolvePackagesTask(CheckPackagesSelectionTask):
         return collect_remote_requirements() \
             + collect_language_requirements(self._dnf_manager) \
             + collect_platform_requirements(self._dnf_manager) \
+            + collect_kernel_requirements() \
             + collect_driver_disk_requirements()
 
     def _collect_required_specs(self):

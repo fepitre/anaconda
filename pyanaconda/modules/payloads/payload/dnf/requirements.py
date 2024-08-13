@@ -127,6 +127,38 @@ def collect_driver_disk_requirements(path="/run/install/dd_packages"):
     return requirements
 
 
+def collect_kernel_requirements():
+    """Collect extra kernel requirements based on the kernel version selected
+    for the installation.
+    """
+    # take kernel version and discard release part as it may be encoded
+    # differently in the package name
+    running_version = os.uname().release.split("-")[0]
+    lorax_packages = "/root/lorax-packages.log"
+    if not os.path.exists(lorax_packages):
+        # not running from installation image, nothing to detect
+        return []
+
+    with open(lorax_packages) as f:
+        for pkg in f.readlines():
+            if not pkg.startswith("kernel"):
+                continue
+            if not running_version in pkg:
+                continue
+            if "latest" in pkg:
+                return [
+                    Requirement.for_package(
+                        package_name="kernel-latest",
+                        reason="Required by launching installer with kernel-latest"
+                    ),
+                    Requirement.for_package(
+                        package_name="kernel-latest-qubes-vm",
+                        reason="Required by launching installer with kernel-latest"
+                    ),
+                ]
+    return []
+
+
 def apply_requirements(requirements, include_list, exclude_list):
     """Apply the provided requirements.
 
