@@ -22,6 +22,7 @@ import time
 import locale as locale_mod
 import functools
 import copy
+from pathlib import Path
 
 from pyanaconda import ntp
 from pyanaconda import flags
@@ -351,13 +352,72 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
     def ready(self):
         return not thread_manager.get(constants.THREAD_DATE_TIME)
 
+    def _get_intended_local_from_widgets(self):
+        if not self._tz:
+            return None
+
+        month = self._get_combo_selection(self._monthCombo)[0]
+        year = self._get_combo_selection(self._yearCombo)[0]
+        day = self._get_combo_selection(self._dayCombo)[0]
+
+        if not (year and month and day):
+            return None
+
+        try:
+            hours = int(self._hoursLabel.get_text())
+            if not self._radioButton24h.get_active():
+                hours = self._to_24h(hours, self._amPmLabel.get_text())
+            minutes = int(self._minutesLabel.get_text())
+        except Exception:
+            return None
+
+        return datetime.datetime(year, month, day, hours, minutes, tzinfo=self._tz)
+
+    def is_valid_system_clock(self):
+        # Verify clock against ISO creation
+        buildstamp = Path("/.buildstamp")
+        try:
+            mtime = buildstamp.stat().st_mtime
+        except FileNotFoundError:
+            log.error("%s not found; cannot verify clock against ISO creation.", buildstamp)
+            return False
+        except Exception as e:
+            log.error("Failed to stat %s: %s", buildstamp, e)
+            return False
+
+        iso_dt = datetime.datetime.fromtimestamp(mtime, tz=datetime.timezone.utc)
+
+        intended_local = self._get_intended_local_from_widgets()
+        if intended_local is not None:
+            now_utc = intended_local.astimezone(datetime.timezone.utc)
+        else:
+            log.debug("Time set pending but widgets incomplete.")
+            return False
+
+        if now_utc < iso_dt:
+            log.error("Current clock (%s) is earlier than ISO creation (%s).",
+                      now_utc.isoformat(), iso_dt.isoformat())
+            return False
+
+        return True
+
     @property
     def completed(self):
         if self._kickstarted and not self._timezone_module.Kickstarted:
             # taking values from kickstart, but not specified
             return False
-        else:
-            return is_valid_timezone(self._timezone_module.Timezone)
+
+        if not is_valid_timezone(self._timezone_module.Timezone):
+            return False
+
+        self.clear_info()
+
+        if not self.is_valid_system_clock():
+            self.set_warning(
+                _("Your system clock seems to be set earlier than the ISO's creation time. Please check your date and time settings."))
+            return False
+
+        return True
 
     @property
     def mandatory(self):
